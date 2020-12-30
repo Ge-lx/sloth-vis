@@ -8,7 +8,7 @@ import numpy as np
 # ----------------------------------
 
 # Whether or not to display a PyQtGraph GUI plot of visualization
-USE_GUI = True
+USE_GUI = False
 # Whether to display debug information
 DEBUG = True
 
@@ -29,8 +29,8 @@ CHANNELS = 2
 SAMPLE_RATE = 44100
 
 # Alsa Device names (typically hw:0,0 or something like that)
-ALSA_SOURCE = 'hw:3,1'
-ALSA_SINK = 'pulse'
+ALSA_SOURCE = 'hw:1,1'
+ALSA_SINK = 'rate_convert'
 
 
 # LED Output
@@ -60,13 +60,13 @@ GAMMA_TABLE_PATH = os.path.join(os.path.dirname(__file__), 'gamma_table.npy')
 # Frequencies below this value will be removed during audio processing
 MIN_FREQUENCY = 20
 # Frequencies above this value will be removed during audio processing
-MAX_FREQUENCY = 20000
+MAX_FREQUENCY = 10000
 # Number of frequency bins to use when transforming audio to frequency domain
-FFT_N_BINS = 150
+FFT_N_BINS = 100
 
 # Length (ms) of the rolling audio window to be used. Will be adjusted to
 # improve fft performance.
-FFT_WINDOW_LENGTH = 50
+FFT_WINDOW_LENGTH = 100
 
 
 # Validation and tuning
@@ -89,3 +89,6 @@ if (DEBUG):
     fft_window_secs = fft_samples_per_window / SAMPLE_RATE
     print(f'Increasing fft window to {fft_samples_per_window} samples -> {(fft_window_secs * 1000):.1F} ms, {(1 / fft_window_secs):.1F} Hz')
     print(f'Using audio period size of {fft_samples_per_update} samples.')
+
+# _max_led_FPS = int(((N_PIXELS * 30e-6) + 50e-6)**-1.0)
+# assert FPS <= _max_led_FPS, 'FPS must be <= {}'.format(_max_led_FPS)

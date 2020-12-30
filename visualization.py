@@ -28,18 +28,14 @@ def visualize_waveform(_, waveform):
 def visualize_spectrum(y, _):
     interpolated = dsp.interpolate(y, config.N_PIXELS)
     pixels = np.array([
-        # np.clip(1*np.log(interpolated*10), 0, 1),
-        # np.clip(0.3*np.log(interpolated*10), 0, 1),
+        np.clip(1*np.log(interpolated*10), 0, 1),
+        np.clip(0.3*np.log(interpolated*10), 0, 1),
         # np.clip(0.3 * interpolated, 0, 1)
         # np.tile(0, config.N_PIXELS),
-        # np.tile(0, config.N_PIXELS),
-        # np.clip(0.3 * interpolated, 0, 1),
-        interpolated,
-        interpolated,
-        interpolated,
-        interpolated
+        np.tile(0, config.N_PIXELS),
+        np.clip(0.3 * interpolated, 0, 1),
     ])
-    return np.clip(pixels, 0, 1) * 255;
+    return pixels * 255;
 
 # Visualization effect to display on the LED strip
 visualization_effect = visualize_waveform
@@ -70,8 +66,7 @@ def update(audio_samples):
     t_fft = time.time() - start
 
     # Visualize    
-    mel = mel / 300
-    mel = mel**2
+    mel = mel / 550
     # mel = mel_smoothing.update(mel)
     led_output = visualization_effect(mel, y_data)
 
