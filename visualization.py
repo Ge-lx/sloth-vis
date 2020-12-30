@@ -48,7 +48,7 @@ def on_state_change (config, visualization):
         t_fft = time.time() - start
 
         # Visualize    
-        mel = mel / 300
+        mel = mel / 550
         mel = mel**2
         # mel = mel_smoothing.update(mel)
         led_output = visualization_effect(mel, y_data)
