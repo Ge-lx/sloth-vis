@@ -13,7 +13,7 @@ import gui
 import led
 
 fifo_visualize = queue.Queue(5)
-fifo_output_sound = queue.Queue(8)
+fifo_output_sound = queue.Queue(12)
 
 # fifo to block on for hardware-timed updates every period-length
 fifo_output_vis = queue.Queue(1)
