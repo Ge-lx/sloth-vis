@@ -53,10 +53,10 @@ async def sloth_config(config_name):
 async def sloth_key_value(config):
 	return 'OK'
 
-@app.route('/status/pixels'):
+@app.route('/status/pixels')
 async def status_pixels():
 	return state.get_pixel_state()
 
-@app.route('/status/sloth'):
+@app.route('/status/sloth')
 async def status_sloth():
 	return state.get_visualization_state()
