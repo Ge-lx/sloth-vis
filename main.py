@@ -6,6 +6,7 @@ import alsaaudio
 import numpy as np
 
 from utils import setInterval, runAsync
+from web import app
 import config
 import visualization
 import gui
@@ -23,7 +24,8 @@ current_output_vis_lock = Lock()
 visualization_ratelocked_led = config.FPS_LED > config.FPS_GUI
 
 def reset_counters():
-    global cnt_input, cnt_xruns_visualize, cnt_output_sound, cnt_visualize, cnt_xruns_output, cnt_output_led, cnt_output_gui, time_a, time_b, time_c
+    global cnt_input, cnt_xruns_visualize, cnt_output_sound, cnt_visualize, \
+           cnt_xruns_output, cnt_output_led, cnt_output_gui, time_a, time_b, time_c
     cnt_input = 0
     cnt_xruns_visualize = 0
     cnt_output_sound = 0
@@ -49,8 +51,11 @@ def print_debug():
 
         time_max_total = 1000/config.target_fft_fps
 
-        print(f'# of periods     : IN {cnt_input:3.0F} -> OUT {cnt_output_sound:3.0F}  |  VIS  {cnt_visualize:3.0F} ({cnt_xruns_visualize:1.0F})  |  OUT ({cnt_xruns_output:1.0F}) - LED {cnt_output_led:3.0F} - GUI {cnt_output_gui:3.0F}')
-        print(f'avg. frame-times : ROLL {time_a*1000:10.3F}ms  |  FFT {time_b*1000:6.3F}ms  |  VIS {time_c*1000:9.3F}ms  -> {time_total*1000:.1F}/{time_max_total:.1F}ms\n')
+        print(f'# of periods     : IN {cnt_input:3.0F} -> OUT {cnt_output_sound:3.0F}  |  VIS  \
+                {cnt_visualize:3.0F} ({cnt_xruns_visualize:1.0F})  |  OUT ({cnt_xruns_output:1.0F}) \
+                - LED {cnt_output_led:3.0F} - GUI {cnt_output_gui:3.0F}')
+        print(f'avg. frame-times : ROLL {time_a*1000:10.3F}ms  |  FFT {time_b*1000:6.3F}ms  |  VIS \
+                {time_c*1000:9.3F}ms  -> {time_total*1000:.1F}/{time_max_total:.1F}ms\n')
         reset_counters()
 
 
@@ -89,11 +94,15 @@ def worker_visualize():
     while True:
         # Block on read when no data is available 
         frame = fifo_visualize.get()
-        array_stereo = np.frombuffer(frame, dtype=np.dtype('<i2'))
 
-        # # Average left and right channel
+        # Don't process if visualization is disabled
+        if (state.visualization_enabled() == False):
+            continue
+
+        # Audio processing
+        array_stereo = np.frombuffer(frame, dtype=np.dtype('<i2'))
         array_mono = array_stereo[::2]/2 + array_stereo[1::2]/2
-        output, (time_a, time_b, time_c) = visualization.update(array_mono)
+        output, (time_a, time_b, time_c) = visualization.process_sample(array_mono)
 
         try:
             fifo_output_vis.put(output, block=False)
@@ -107,6 +116,9 @@ def worker_visualize():
         cnt_visualize += 1
 
 def once_output_led():
+    if (state.visualization_enabled() == False):
+        return
+
     global cnt_output_led
     if (visualization_ratelocked_led):
         # Block on read
@@ -122,6 +134,9 @@ def once_output_led():
     cnt_output_led += 1
 
 def once_output_gui():
+    if (state.visualization_enabled() == False):
+        return
+
     global cnt_output_gui
     if (visualization_ratelocked_led):
         with current_output_vis_lock:
@@ -137,6 +152,9 @@ def once_output_gui():
     cnt_output_gui += 1
 
 if __name__ == '__main__':
+    app.run()
+    print(f'Started web sever.')
+
     # Start sound workers
     alsa_source = alsaaudio.PCM(alsaaudio.PCM_CAPTURE,
         format = alsaaudio.PCM_FORMAT_S16_LE,
