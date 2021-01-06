@@ -16,7 +16,7 @@ mel_trafo, (mel_x, _) = dsp.compute_melmat(
 
 # The fft window shape
 fft_window = np.hamming(config.fft_samples_per_window)
-mel_smoothing = dsp.ExpFilter(np.tile(1e-1, config.FFT_N_BINS), alpha_decay=0.8, alpha_rise=0.99)
+mel_smoothing = dsp.ExpFilter(np.tile(1e-1, config.FFT_N_BINS), alpha_decay=0.8, alpha_rise=0.79)
 
 def visualize_waveform(_, waveform):
     interpolated = dsp.interpolate(waveform, config.N_PIXELS)
@@ -38,7 +38,7 @@ def visualize_spectrum(y, _):
     return pixels * 255;
 
 # Visualization effect to display on the LED strip
-visualization_effect = visualize_waveform
+visualization_effect = visualize_spectrum
 
 
 # Array containing the rolling audio sample window
@@ -67,7 +67,7 @@ def update(audio_samples):
 
     # Visualize    
     mel = mel / 550
-    # mel = mel_smoothing.update(mel)
+    mel = mel_smoothing.update(mel)
     led_output = visualization_effect(mel, y_data)
 
     t_vis = time.time() - start
