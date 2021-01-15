@@ -3,28 +3,31 @@ from __future__ import division
 import time
 import numpy as np
 import state
+import dsp
 
 # Handler for audio samples. Will be updated in 'on_state_change'
 process_sample = lambda samples: None
 
 def on_state_change (config, visualization):
+    print('on_state_change')
+    global process_sample
     # FFT window shape
-    fft_window = np.hamming(config.fft_samples_per_window)
+    fft_window = np.hamming(config['fft_samples_per_window'])
 
     # FFT binning (mel-bank-transformation)
     mel_trafo, (mel_x, _) = dsp.compute_melmat(
-        num_mel_bands=config.FFT_N_BINS,
-        freq_min=config.MIN_FREQUENCY,
-        freq_max=config.MAX_FREQUENCY,
-        num_fft_bands=int(config.fft_samples_per_window / 2),
-        sample_rate=config.SAMPLE_RATE
+        num_mel_bands=config['FFT_N_BINS'],
+        freq_min=config['MIN_FREQUENCY'],
+        freq_max=config['MAX_FREQUENCY'],
+        num_fft_bands=int(config['fft_samples_per_window'] / 2),
+        sample_rate=config['SAMPLE_RATE']
     )
 
     #Smoothing on spectrum output
-    mel_smoothing = dsp.ExpFilter(np.tile(1e-1, config.FFT_N_BINS), alpha_decay=0.8, alpha_rise=0.99)
+    mel_smoothing = dsp.ExpFilter(np.tile(1e-1, config['FFT_N_BINS']), alpha_decay=0.8, alpha_rise=0.99)
 
     # Audio sample rolling window
-    y_roll = np.random.rand(config.fft_samples_per_window) / 1e16
+    y_roll = np.random.rand(config['fft_samples_per_window']) / 1e16
 
     def update(audio_samples):
         nonlocal y_roll
@@ -51,7 +54,7 @@ def on_state_change (config, visualization):
         mel = mel / 550
         mel = mel**2
         # mel = mel_smoothing.update(mel)
-        led_output = visualization_effect(mel, y_data)
+        led_output = visualization(mel, y_data)
 
         t_vis = time.time() - start
 

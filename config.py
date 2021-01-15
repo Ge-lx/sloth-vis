@@ -60,28 +60,30 @@ def visualizations(config):
 	import numpy as np
 	import dsp
 
+	N_PIXELS = config['N_PIXELS']
+
 	# A valid visualization is a function with the following signature:
 	# Callable[[np.ndarray[float, FFT_N_BINS], np.ndarray[float, len(FFT_WINDOW)]]
 	#  -> np.ndarray[int, 4, N_PIXELS]]
 
 	def visualize_waveform(_, waveform):
-	    interpolated = dsp.interpolate(waveform, config.N_PIXELS)
+	    interpolated = dsp.interpolate(waveform, N_PIXELS)
 	    clipped = np.clip(interpolated - 0.5, 0, 1) * 50
 
-	    zeros = np.zeros(config.N_PIXELS);
+	    zeros = np.zeros(N_PIXELS);
 	    return np.array([zeros, zeros, zeros, clipped]);
 
-		def visualize_spectrum(spectrum, _):
-			interpolated = dsp.interpolate(spectrum, config.N_PIXELS)
-			pixels = np.array([
-				np.clip(1*np.log(interpolated*10), 0, 1),
-				np.clip(0.3*np.log(interpolated*10), 0, 1),
-				np.tile(0, config.N_PIXELS),
-				np.clip(0.3 * interpolated, 0, 1),
-			])
+	def visualize_spectrum(spectrum, _):
+		interpolated = dsp.interpolate(spectrum, N_PIXELS)
+		pixels = np.array([
+			np.clip(1*np.log(interpolated*10), 0, 1),
+			np.clip(0.3*np.log(interpolated*10), 0, 1),
+			np.tile(0, N_PIXELS),
+			np.clip(0.3 * interpolated, 0, 1),
+		])
 		return pixels * 255;
 
 	return {
-		'waveform': visualize_waveform,
-		'spectrum': visualize_spectrum
+		'spectrum': visualize_spectrum,
+		'waveform': visualize_waveform
 	}

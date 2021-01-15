@@ -11,12 +11,12 @@ async def index():
 
 @app.route('/pixels/fill')
 async def fill():
-	state.enable_pixels()
+	state.enable_static()
 	return 'OK'
 
 @app.route('/pixels/clear')
 async def clear():
-	state.disable_pixels()
+	state.disable_static()
 	return 'OK'
 
 @app.route('/pixels/timer/<int:secs>')
@@ -26,20 +26,20 @@ async def timer(secs):
 
 @app.route('/pixels/brightness/<int:value>')
 async def set_brightness(value):
-	state.set_brightness(value)
+	state.set_static_brightness(value)
 	return 'OK'
 
-@app.route('/pixels/color/<int:r>/<int:b>/<int:g>/<int:w>')
+@app.route('/pixels/color/<int:r>/<int:g>/<int:b>/<int:w>')
 async def set_color(r, g, b, w):
-	state.set_color({ 'r': r, 'g': g, 'b': b, 'w': w })
+	state.set_static_color({ 'r': r, 'g': g, 'b': b, 'w': w })
 	return 'OK'
 
-@app.route('/sloth/enable')
+@app.route('/cava/start')
 async def sloth_enable():
 	state.enable_visualization()
 	return 'OK'
 
-@app.route('/slot/stop')
+@app.route('/cava/stop')
 async def sloth_disable():
 	state.disable_visualization()
 	return 'OK'
@@ -55,8 +55,11 @@ async def sloth_key_value(config):
 
 @app.route('/status/pixels')
 async def status_pixels():
-	return state.get_pixel_state()
+	return state.get_pixels_state()
 
-@app.route('/status/sloth')
+@app.route('/status/config')
 async def status_sloth():
 	return state.get_visualization_state()
+
+if __name__ == '__main__':
+	app.run(host='0.0.0.0')
