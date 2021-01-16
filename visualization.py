@@ -5,6 +5,7 @@ import numpy as np
 
 import config
 import dsp
+from utils import hsv2rgb
 
 mel_trafo, (mel_x, _) = dsp.compute_melmat(
     num_mel_bands=config.FFT_N_BINS,
@@ -17,6 +18,7 @@ mel_trafo, (mel_x, _) = dsp.compute_melmat(
 # The fft window shape
 fft_window = np.hamming(config.fft_samples_per_window)
 mel_smoothing = dsp.ExpFilter(np.tile(1e-1, config.FFT_N_BINS), alpha_decay=0.8, alpha_rise=0.79)
+maximum_filter = dsp.ExpFilter(np.tile(0, 1), alpha_decay=0.001, alpha_rise=0.99)
 
 def visualize_waveform(_, waveform):
     interpolated = dsp.interpolate(waveform, config.N_PIXELS)
@@ -27,12 +29,27 @@ def visualize_waveform(_, waveform):
 
 def visualize_spectrum(y, _):
     interpolated = dsp.interpolate(y, config.N_PIXELS)
+    log_part = np.log(interpolated*10)
+
+    # print(f'max: {} , min: {np.min(log_part)}')
+
+    max_filt = 3 # maximum_filter.update([np.max(log_part)])[0]
+    log_part /= 3
+    log_part = 0.5 + np.clip(log_part, 0, 0.5)
+    def color_from_value (x):
+        return hsv2rgb(x, 1, x)
+
+    colors = np.array([color_from_value(h) for h in log_part]).transpose()
+
+    # print(log_part[123])
+
     pixels = np.array([
-        np.clip(1*np.log(interpolated*10), 0, 1),
-        np.clip(0.3*np.log(interpolated*10), 0, 1),
-        # np.clip(0.3 * interpolated, 0, 1)
+        # np.clip(1*log_part, 0, 1),
+        # np.clip(0.3*log_part, 0, 1),
         # np.tile(0, config.N_PIXELS),
-        np.tile(0, config.N_PIXELS),
+        colors[0],
+        colors[1],
+        colors[2],
         np.clip(0.3 * interpolated, 0, 1),
     ])
     return pixels * 255;
