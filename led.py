@@ -8,7 +8,10 @@ udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 def update(output):
     pixels = output[2].astype(int)
-
+    pixels[:,12] = [0, 0, 0, 0] # this one is broken
+    pixels[:,0] = [0, 0, 0, 0]
+    pixels[:,1] = [0, 0, 0, 0]
+    pixels[:,2] = [0, 0, 0, 0]
     m = np.ndarray([config.N_PIXELS, 4], np.uint8);
     for i in range(config.N_PIXELS):
         r, g, b, w = pixels[0][i], pixels[1][i], pixels[2][i], pixels[3][i]
