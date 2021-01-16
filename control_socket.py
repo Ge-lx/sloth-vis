@@ -21,3 +21,6 @@ def start_control_socket ():
 			state.enable_visualization()
 		elif (msg_type == SOCKET_MSG_SLOTH['stop']):
 			state.disable_visualization()
+		elif (msg_type == SOCKET_MSG_SLOTH['select']):
+			visualization_names = state.get_visualization_names()
+			state.set_visualization(visualization_names[msgs[1]])

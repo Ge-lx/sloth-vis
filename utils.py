@@ -1,6 +1,8 @@
 from functools import wraps
 from threading import Thread
 import time
+import colorsys
+import numpy as np
 
 def memoize(function):
     """Provides a decorator for memoizing functions"""
@@ -43,3 +45,7 @@ def setInterval (callback, interval):
 def runAsync (callback):
     thread = Thread(target=callback, daemon=False)
     thread.start()
+
+
+def hsv2rgb(h,s,v):
+    return np.array([i for i in colorsys.hsv_to_rgb(h,s,v)])

@@ -66,10 +66,10 @@ pixels_state = {
 # Changer API
 # -----------------
 def get_visualization_names():
-	return available_visualizations.keys()
+	return list(available_visualizations.keys())
 
 def get_config_names():
-	return available_configurations.keys()
+	return list(available_configurations.keys())
 
 def get_pixels_state():
 	return pixels_state

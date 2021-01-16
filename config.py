@@ -2,6 +2,7 @@
 from __future__ import print_function
 from __future__ import division
 import os
+from utils import hsv2rgb
 
 configurations = {
 	'default': {
@@ -83,7 +84,27 @@ def visualizations(config):
 		])
 		return pixels * 255;
 
+	def visualize_spectrum_2(y, _):
+	    interpolated = dsp.interpolate(y, N_PIXELS)
+	    log_part = np.log(interpolated*10)
+
+	    log_part /= 3
+	    log_part = 0.5 + np.clip(log_part, 0, 0.5)
+
+	    def color_from_value (x):
+	        return hsv2rgb(x, 1, x)
+
+	    colors = np.array([color_from_value(h) for h in log_part]).transpose()
+	    pixels = np.array([
+	        colors[0],
+	        colors[1],
+	        colors[2],
+	        np.clip(0.3 * interpolated, 0, 1),
+	    ])
+	    return pixels * 255;
+
 	return {
 		'spectrum': visualize_spectrum,
-		'waveform': visualize_waveform
+		'waveform': visualize_waveform,
+		'spectrum2': visualize_spectrum_2,
 	}
