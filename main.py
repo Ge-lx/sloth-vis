@@ -6,7 +6,8 @@ import alsaaudio
 import numpy as np
 
 from utils import setInterval, runAsync
-from web import app
+# from web import app
+import control_socket
 import state
 import visualization
 import gui
@@ -93,8 +94,6 @@ def worker_output_sound(alsa_sink):
 def worker_visualize():
     global cnt_visualize, cnt_xruns_output, current_output_vis, time_a, time_b, time_c
     while True:
-        if (state.visualization_enabled()):
-            continue
         # Block on read when no data is available 
         frame = fifo_visualize.get()
 
@@ -203,4 +202,5 @@ if __name__ == '__main__':
         gui.init(tick_callback=print_debug if config["DEBUG"] else lambda: None)
     else:
         setInterval(print_debug, 1)
-        app.run(host='0.0.0.0')
+        control_socket.start_control_socket()
+        # app.run(host='0.0.0.0')
