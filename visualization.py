@@ -15,7 +15,7 @@ def on_state_change (config, visualization):
     fft_window = np.hamming(config['fft_samples_per_window'])
 
     # FFT binning (mel-bank-transformation)
-    mel_trafo, (mel_x, _) = dsp.compute_melmat(
+    mel_trafo, (mel_x, fft_x) = dsp.compute_melmat(
         num_mel_bands=config['FFT_N_BINS'],
         freq_min=config['MIN_FREQUENCY'],
         freq_max=config['MAX_FREQUENCY'],
@@ -45,8 +45,8 @@ def on_state_change (config, visualization):
 
         # Fourier transform and mel transformation
         N = len(y_data)
-        YS = np.abs(np.fft.rfft(y_data * fft_window)[:N // 2])
-        mel =  mel_trafo(YS)
+        fft = np.abs(np.fft.rfft(y_data * fft_window)[:N // 2])
+        mel =  mel_trafo(fft)
 
         t_fft = time.time() - start
 
@@ -54,7 +54,7 @@ def on_state_change (config, visualization):
         mel = mel / 550
         mel = mel**2
         # mel = mel_smoothing.update(mel)
-        led_output = visualization(mel, y_data)
+        led_output = visualization(mel, y_data, (fft, fft_x))
 
         t_vis = time.time() - start
 

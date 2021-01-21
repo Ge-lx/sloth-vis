@@ -68,14 +68,14 @@ def visualizations(config):
 	# Callable[[np.ndarray[float, FFT_N_BINS], np.ndarray[float, len(FFT_WINDOW)]]
 	#  -> np.ndarray[int, 4, N_PIXELS]]
 
-	def visualize_waveform(_, waveform):
+	def visualize_waveform(_, waveform, __):
 	    interpolated = dsp.interpolate(waveform, N_PIXELS)
 	    clipped = np.clip(interpolated - 0.5, 0, 1) * 50
 
 	    zeros = np.zeros(N_PIXELS);
 	    return np.array([zeros, zeros, zeros, clipped]);
 
-	def visualize_spectrum(spectrum, _):
+	def visualize_spectrum(spectrum, _, __):
 		interpolated = dsp.interpolate(spectrum, N_PIXELS)
 		pixels = np.array([
 			np.clip(1*np.log(interpolated*10), 0, 1),
@@ -86,7 +86,7 @@ def visualizations(config):
 		return pixels * 255;
 
 	smoothing = dsp.ExpFilter(np.tile(1e-1, N_PIXELS), alpha_decay=0.1, alpha_rise=0.7)
-	def visualize_spectrum_smooth(spectrum, _):
+	def visualize_spectrum_smooth(spectrum, _, __):
 		interpolated = dsp.interpolate(spectrum, N_PIXELS)
 		interpolated = smoothing.update(interpolated)
 		pixels = np.array([
@@ -97,7 +97,7 @@ def visualizations(config):
 		])
 		return pixels * 255;
 
-	def visualize_spectrum_2(y, _):
+	def visualize_spectrum_2(y, _, __):
 	    interpolated = dsp.interpolate(y, N_PIXELS)
 	    log_part = np.log(interpolated*10)
 
@@ -116,9 +116,44 @@ def visualizations(config):
 	    ])
 	    return pixels * 255;
 
+	indices = None
+	fft_smoothing = dsp.ExpFilter(np.tile(1e-1, int(config['fft_samples_per_window'] / 2)), alpha_decay=0.1, alpha_rise=0.7)
+	def folded_fourier(_, __, fft_data):
+		nonlocal indices
+
+		fft, freqs = fft_data
+		output = np.zeros((4, N_PIXELS), dtype=np.float64)
+
+		fft = np.log(fft / 100)
+		
+		if (indices == None):
+			indices = list([0])
+			f = 55
+			done = False
+			while not done:
+				compatible = max([j for j, freq in enumerate(freqs) if freq < f])
+				# print(f'{compatible} of {len(freqs)}')
+				done = compatible == len(freqs) - 1
+				f *= 2
+				indices.append(compatible)
+
+		# print(indices)
+
+		for i in range(1, len(indices) - 1):
+			prominence = abs(1/(0.49999 - (i / len(indices) - 1)))**2
+			color = np.tile(hsv2rgb(i / len(indices), 1, prominence), (N_PIXELS, 1)).transpose()
+			value = np.clip(dsp.interpolate(fft[indices[i-1]:indices[i]], N_PIXELS), 0, 1)
+			fold = np.array([color[0] * value, color[1] * value, color[2] * value, np.zeros(N_PIXELS)])
+			# print(f'shapes: {color.shape} and {value.shape} and {fold.shape}')
+			# print(fold)
+			output += fold
+
+		return output * 255
+
 	return {
 		'spectrum': visualize_spectrum,
 		'waveform': visualize_waveform,
 		'spectrum2': visualize_spectrum_2,
 		'smooth': visualize_spectrum_smooth,
+		'folded': folded_fourier
 	}

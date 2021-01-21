@@ -129,13 +129,14 @@ def once_output_led():
     if (visualization_ratelocked_led):
         # Block on read
         output = fifo_output_vis.get()
-        led.update(output)
+        if (state.visualization_enabled()):
+            led.update(output)
         fifo_output_vis.task_done()
     else:
         with current_output_vis_lock:
             output = current_output_vis
 
-        if (output is not None):
+        if (output is not None and state.visualization_enabled()):
             led.update(output)
     cnt_output_led += 1
 
