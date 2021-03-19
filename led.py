@@ -5,7 +5,7 @@ import numpy as np
 from state import default_config as config
 
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-dead_pixels = [8, 20, 33, 38, 78, 84, 124]
+dead_pixels = [1, 8, 20, 33, 38, 78, 84, 124]
 
 def send_pixels(pixels):
     for i in dead_pixels:
