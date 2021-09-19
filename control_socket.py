@@ -1,5 +1,6 @@
 import socket
 import state
+import time
 
 SOCKET_MSG_SLOTH = {
 	'start': 0,
@@ -15,7 +16,7 @@ def start_control_socket ():
 		data, address = sock.recvfrom(4096)
 		print(f'Received {len(data)} bytes from {address}')
 		msgs = list(data)
-
+		time.sleep(0)
 		msg_type = msgs[0]
 		if (msg_type == SOCKET_MSG_SLOTH['start']):
 			state.enable_visualization()

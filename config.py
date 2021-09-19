@@ -35,7 +35,7 @@ configurations = {
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 8080,
 		# Number of pixels in the LED strip (must match ESP8266 firmware)
-		'N_PIXELS': 300,
+		'N_PIXELS': 40,
 		# Target LED framerate. Will warn when this can't be met.
 		'FPS_LED': 100,
 		# Set to False because the firmware handles gamma correction + dither"""
@@ -50,7 +50,7 @@ configurations = {
 		# Frequencies above this value will be removed during audio processing
 		'MAX_FREQUENCY': 10000,
 		# Number of frequency bins to use when transforming audio to frequency domain
-		'FFT_N_BINS': 100,
+		'FFT_N_BINS': 40,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
 		'FFT_WINDOW_LENGTH': 100
@@ -73,15 +73,15 @@ def visualizations(config):
 	    clipped = np.clip(interpolated - 0.5, 0, 1) * 50
 
 	    zeros = np.zeros(N_PIXELS);
-	    return np.array([zeros, zeros, zeros, clipped]);
+	    return np.array([clipped, clipped, clipped, zeros]);
 
 	def visualize_spectrum(spectrum, _, __):
 		interpolated = dsp.interpolate(spectrum, N_PIXELS)
 		pixels = np.array([
 			np.clip(1*np.log(interpolated*10), 0, 1),
 			np.clip(0.3*np.log(interpolated*10), 0, 1),
-			np.tile(0, N_PIXELS),
 			np.clip(0.3 * interpolated, 0, 1),
+			np.tile(0, N_PIXELS)
 		])
 		return pixels * 255;
 
@@ -93,7 +93,7 @@ def visualizations(config):
 			np.clip(1*np.log(interpolated*10), 0, 1),
 			np.clip(0.3*np.log(interpolated*10), 0, 1),
 			np.tile(0, N_PIXELS),
-			np.clip(0.3 * interpolated, 0, 1),
+			np.clip(0.3 * interpolated, 0, 1)
 		])
 		return pixels * 255;
 

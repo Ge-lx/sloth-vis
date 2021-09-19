@@ -67,14 +67,15 @@ def worker_input(alsa_source):
         l, data = alsa_source.read()
         if l < 1: continue
 
-        # Block on put to output_queue to time on output device clock
-        fifo_output_sound.put(data)
-
         if (state.visualization_enabled()):
             try:
                 fifo_visualize.put(data, block=False)
             except queue.Full:
                 cnt_xruns_visualize += 1          
+
+        # Block on put to output_queue to time on output device clock
+        fifo_output_sound.put(data)
+
         cnt_input += 1  
 
 
