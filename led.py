@@ -1,24 +1,19 @@
-from __future__ import print_function
-from __future__ import division
-import socket
-import numpy as np
-from state import default_config as config
+import config
+from rpi_ws281x import Adafruit_NeoPixel, Color
 
-udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-dead_pixels = [] #1, 8, 20, 33, 38, 78, 84, 124]
+LED_COUNT = config['N_PIXELS']
+LED_PIN = config['LED_PIN']
+LED_FREQ_HZ = config['LED_FREQ_HZ']
+LED_BRIGHTNESS = config['LED_BRIGHTNESS']
+LED_DMA = 10 # Don't fuck with this. Look it up
+LED_INVERT = False
 
-def send_pixels(pixels):
-    m = np.ndarray([config['N_PIXELS'], 4], np.uint8);
-    for i in range(config['N_PIXELS']):
-        r, g, b, w = pixels[0][i], pixels[1][i], pixels[2][i], pixels[3][i]
-        m[i][0] = r
-        m[i][1] = g
-        m[i][2] = b
-        m[i][3] = w
-
-    udp_socket.sendto(bytes(m.flatten()), (config['UDP_IP'], config['UDP_PORT']));
+strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS)
+strip.begin()
 
 def update(output):
-    pixels = output[2].astype(int)
-    return send_pixels(pixels)
-    
+    pixels = output[2]
+    for i in range(config['N_PIXELS']):
+        strip.setPixelColorRGB(i, pixels[0][i], pixels[0][i], pixels[0][i])
+
+    strip.show()

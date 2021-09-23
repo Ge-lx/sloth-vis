@@ -30,12 +30,14 @@ configurations = {
 
 		# LED Output
 		# ----------------------------------
-		# IP address of the ESP8266. Must match IP in ws2812_controller.ino
-		'UDP_IP': '192.168.43.21',
-		# Port number used for socket communication between Python and ESP8266
-		'UDP_PORT': 8080,
-		# Number of pixels in the LED strip (must match ESP8266 firmware)
+		# Number of pixels in the LED strip
 		'N_PIXELS': 40,
+		# GPIO output pin to use
+		'LED_PIN': 18,
+		# LED signal frequency in hertz (usually 800khz)
+		'LED_FREQ_HZ': 800000,
+		# LED brightness (8 bit = [0, 255])
+		'LED_BRIGHTNESS': 255,
 		# Target LED framerate. Will warn when this can't be met.
 		'FPS_LED': 40,
 		# Set to False because the firmware handles gamma correction + dither"""
@@ -50,7 +52,7 @@ configurations = {
 		# Frequencies above this value will be removed during audio processing
 		'MAX_FREQUENCY': 10000,
 		# Number of frequency bins to use when transforming audio to frequency domain
-		'FFT_N_BINS': 40,
+		'FFT_N_BINS': 10,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
 		'FFT_WINDOW_LENGTH': 100
