@@ -1,4 +1,4 @@
-from deepmerge.always_merger import merge as deepmerge
+from deepmerge import always_merger as deepmerge
 from copy import deepcopy
 import numpy as np
 
