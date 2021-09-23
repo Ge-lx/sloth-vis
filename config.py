@@ -8,12 +8,12 @@ import numpy as np
 # ----------------------------------
 
 # Whether or not to display a PyQtGraph GUI plot of visualization
-USE_GUI = True
+USE_GUI = False
 # Whether to display debug information
 DEBUG = True
 
 # Target GUI framerate. Will warn when this can't be met.
-FPS_GUI = 60
+FPS_GUI = 30
 
 
 # Alsa Configuration
@@ -29,8 +29,8 @@ CHANNELS = 2
 SAMPLE_RATE = 44100
 
 # Alsa Device names (typically hw:0,0 or something like that)
-ALSA_SOURCE = 'hw:3,1'
-ALSA_SINK = 'pulse'
+ALSA_SOURCE = 'hw:0,0'
+ALSA_SINK = 'hw:1,0'
 
 
 # LED Output
@@ -42,10 +42,10 @@ UDP_IP = '192.168.178.175'
 UDP_PORT = 8080
 
 # Number of pixels in the LED strip (must match ESP8266 firmware)
-N_PIXELS = 300
+N_PIXELS = 40
 
 # Target LED framerate. Will warn when this can't be met.
-FPS_LED = 100
+FPS_LED = 30
 
 # Set to False because the firmware handles gamma correction + dither"""
 SOFTWARE_GAMMA_CORRECTION = False
@@ -62,11 +62,11 @@ MIN_FREQUENCY = 20
 # Frequencies above this value will be removed during audio processing
 MAX_FREQUENCY = 20000
 # Number of frequency bins to use when transforming audio to frequency domain
-FFT_N_BINS = 150
+FFT_N_BINS = 10
 
 # Length (ms) of the rolling audio window to be used. Will be adjusted to
 # improve fft performance.
-FFT_WINDOW_LENGTH = 50
+FFT_WINDOW_LENGTH = 60
 
 
 # Validation and tuning

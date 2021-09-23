@@ -42,7 +42,7 @@ def visualize_spectrum(y, _):
     return np.clip(pixels, 0, 1) * 255;
 
 # Visualization effect to display on the LED strip
-visualization_effect = visualize_waveform
+visualization_effect = visualize_spectrum
 
 
 # Array containing the rolling audio sample window
