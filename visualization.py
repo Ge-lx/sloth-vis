@@ -6,7 +6,7 @@ import state
 import dsp
 
 # Handler for audio samples. Will be updated in 'on_state_change'
-process_sample = lambda samples: None
+process_sample = lambda samples, logger: None
 
 def on_state_change (config, visualization):
     print('on_state_change')
@@ -29,9 +29,9 @@ def on_state_change (config, visualization):
     # Audio sample rolling window
     y_roll = np.random.rand(config['fft_samples_per_window']) / 1e16
 
-    def update(audio_samples):
+    def update(audio_samples, logger):
         nonlocal y_roll
-        start = time.time()
+        logger('idle')
 
         # Normalize samples between 0 and 1
         y_update = audio_samples / 2.0**15 + 0.5
@@ -41,24 +41,24 @@ def on_state_change (config, visualization):
         y_roll[-l:] = y_update
         y_data = y_roll.astype(np.float32)
 
-        t_roll = time.time() - start
+        logger('roll')
 
         # Fourier transform and mel transformation
         N = len(y_data)
-        fft = np.abs(np.fft.rfft(y_data * fft_window)[:N // 2])
-        mel =  mel_trafo(fft)
-
-        t_fft = time.time() - start
-
-        # Visualize
+        fft = np.abs(np.fft.rfft(y_data * fft_window)[:N // 2]) #np.zeros(N//2)#
+        mel = mel_trafo(fft)
         mel = mel / 550
         mel = mel**2
+
+        logger('fft')
+        
+        # Visualize
         # mel = mel_smoothing.update(mel)
         led_output = visualization(mel, y_data, (fft, fft_x))
 
-        t_vis = time.time() - start
+        logger('vis')
 
-        return ((y_data, mel, led_output), (t_roll, t_fft, t_vis))
+        return (y_data, mel, led_output)
 
     # Update sample handler
     process_sample = update

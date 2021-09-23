@@ -26,9 +26,83 @@ current_output_vis_lock = Lock()
 # Which output should be ratelocked to the visualization
 visualization_ratelocked_led = config["FPS_LED"] > config["FPS_GUI"]
 
+def performance_logger():
+    measurements = dict()
+    start = time.time()
+    last = start
+
+    def reset():
+        nonlocal last, start, measurements
+        measurements = dict()
+        start = time.time()
+        last = start
+
+    def measure(name):
+        nonlocal last, start, measurements
+        now = time.time()
+        diff = now - last
+        last = now
+
+        if name in measurements:
+            measurements[name] += [diff]
+        else:
+            measurements[name] = [diff]
+
+    def log(length):
+        nonlocal last, start, measurements
+        if (len(measurements.keys()) == 0):
+            return
+
+        total_time = sum([sum(times) for _, times in measurements.items()])
+        counts = len(measurements[list(measurements.keys())[0]])
+        # mean_frame_time = total_time / counts
+
+        results = sorted([({
+            'name': name, \
+            'mean': np.mean(diff_times), \
+            'share': np.sum(diff_times) / total_time \
+        }) for name, diff_times in measurements.items()], key=lambda x: x['name'])
+
+        # results.sort(lambda x: x['name'])
+
+        out_names = '|'
+        out_times = '|'
+        space_loan = 0
+
+        def generate_strings(e):
+            nonlocal out_names, out_times, space_loan
+            # l = int(length * e['share'] + 0.5) - space_loan
+
+            out_names += f'{e["name"]} : {e["mean"] * 1000:.1F}ms'.center(20) + '|'
+
+            # time = f'{e["mean"] * 1000:.1F}ms'.center(l-1) + '|'
+            # name = f'{e["name"]}'.center(len(time)-1) + '|'
+
+            # out_names += name
+            # out_times += time
+
+            # final_length = max(len(name), len(time))
+            # if (final_length > l):
+            #     space_loan = final_length - l
+            # else:
+            #     space_loan = 0
+
+        [generate_strings(e) for e in results]
+
+        # assert(len(out_names) == length)
+        # assert(len(out_times) == length)
+
+        print(out_names)
+        # print(out_times)
+
+
+    return {'reset': reset, 'measure': measure, 'log': log}
+
+logger = performance_logger()
+
 def reset_counters():
     global cnt_input, cnt_xruns_visualize, cnt_output_sound, cnt_visualize, \
-           cnt_xruns_output, cnt_output_led, cnt_output_gui, time_a, time_b, time_c
+           cnt_xruns_output, cnt_output_led, cnt_output_gui
     cnt_input = 0
     cnt_xruns_visualize = 0
     cnt_output_sound = 0
@@ -38,26 +112,20 @@ def reset_counters():
 
     cnt_output_led = 0
     cnt_output_gui = 0
-
-    time_a = time_b = time_c = 0
 reset_counters()
 
 last_second = time.time()
 def print_debug():
-    global last_second, time_c, time_b
+    global last_second
     if (time.time() - last_second > 1):
         last_second += 1
 
-        time_total = time_c
-        time_c -= time_b
-        time_b -= time_a
-
-        time_max_total = 1000/config["target_fft_fps"]
-
         if (config["DEBUG"]):
-            print(f'# of periods     : IN {cnt_input:3.0F} -> OUT {cnt_output_sound:3.0F}  |  VIS  {cnt_visualize:3.0F} ({cnt_xruns_visualize:1.0F})  |  OUT ({cnt_xruns_output:1.0F}) - LED {cnt_output_led:3.0F} - GUI {cnt_output_gui:3.0F}')
-            print(f'avg. frame-times : ROLL {time_a*1000:10.3F}ms  |  FFT {time_b*1000:6.3F}ms  |  VIS {time_c*1000:9.3F}ms  -> {time_total*1000:.1F}/{time_max_total:.1F}ms\n')
+            logger['log'](100)
+            logger['reset']()
+            print(f'Queue throughput  : IN {cnt_input:3.0F} -> OUT {cnt_output_sound:3.0F}  |  VIS  {cnt_visualize:3.0F} ({cnt_xruns_visualize:1.0F})  |  OUT ({cnt_xruns_output:1.0F}) - LED {cnt_output_led:3.0F} - GUI {cnt_output_gui:3.0F}\n')
         reset_counters()
+
 
 
 def worker_input(alsa_source):
@@ -93,7 +161,7 @@ def worker_output_sound(alsa_sink):
         cnt_output_sound += 1
 
 def worker_visualize():
-    global cnt_visualize, cnt_xruns_output, current_output_vis, time_a, time_b, time_c
+    global cnt_visualize, cnt_xruns_output, current_output_vis
     while True:
         # Block on read when no data is available 
         frame = fifo_visualize.get()
@@ -106,10 +174,10 @@ def worker_visualize():
         array_stereo = np.frombuffer(frame, dtype=np.dtype('<i2'))
         array_mono = array_stereo[::2]/2 + array_stereo[1::2]/2
 
-        res = visualization.process_sample(array_mono)
+        res = visualization.process_sample(array_mono, logger['measure'])
         if (res == None):
             continue
-        output, (time_a, time_b, time_c) = res
+        output = res
 
         try:
             fifo_output_vis.put(output, block=False)
