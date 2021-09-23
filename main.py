@@ -15,8 +15,8 @@ import led
 
 config = state.default_config
 
-fifo_visualize = queue.Queue(9)
-fifo_output_sound = queue.Queue(12)
+fifo_visualize = queue.Queue(4)
+fifo_output_sound = queue.Queue(7)
 
 # fifo to block on for hardware-timed updates every period-length
 fifo_output_vis = queue.Queue(1)

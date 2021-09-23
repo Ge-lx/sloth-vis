@@ -1,4 +1,5 @@
-import config
+import numpy as np
+from state import default_config as config
 from rpi_ws281x import Adafruit_NeoPixel, Color
 
 LED_COUNT = config['N_PIXELS']
@@ -14,6 +15,6 @@ strip.begin()
 def update(output):
     pixels = output[2]
     for i in range(config['N_PIXELS']):
-        strip.setPixelColorRGB(i, pixels[0][i], pixels[0][i], pixels[0][i])
+        strip.setPixelColorRGB(i, int(pixels[0][i]), int(pixels[0][i]), int(pixels[0][i]))
 
     strip.show()

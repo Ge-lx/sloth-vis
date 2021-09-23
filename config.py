@@ -14,7 +14,7 @@ configurations = {
 		# Whether to display debug information
 		'DEBUG': True,
 		# Target GUI framerate. Will warn when this can't be met.
-		'FPS_GUI': 60,
+		'FPS_GUI': 1,
 
 		# Alsa Configuration
 		# ----------------------------------------------
@@ -25,8 +25,8 @@ configurations = {
 		# Hardware sample rate
 		'SAMPLE_RATE': 44100,
 		# Alsa Device names (typically hw:0,0 or something like that)
-		'ALSA_SOURCE': 'hw:3,0',#'pulse',
-		'ALSA_SINK': 'pulse',#'rate_convert',
+		'ALSA_SOURCE': 'hw:0,0',
+		'ALSA_SINK': 'hw:1,0',
 
 		# LED Output
 		# ----------------------------------
@@ -39,7 +39,7 @@ configurations = {
 		# LED brightness (8 bit = [0, 255])
 		'LED_BRIGHTNESS': 255,
 		# Target LED framerate. Will warn when this can't be met.
-		'FPS_LED': 40,
+		'FPS_LED': 30,
 		# Set to False because the firmware handles gamma correction + dither"""
 		'SOFTWARE_GAMMA_CORRECTION': False,
 		# Location of the gamma correction table
@@ -52,10 +52,10 @@ configurations = {
 		# Frequencies above this value will be removed during audio processing
 		'MAX_FREQUENCY': 10000,
 		# Number of frequency bins to use when transforming audio to frequency domain
-		'FFT_N_BINS': 10,
+		'FFT_N_BINS': 20,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
-		'FFT_WINDOW_LENGTH': 100
+		'FFT_WINDOW_LENGTH': 64
 	}
 }
 
@@ -79,24 +79,20 @@ def visualizations(config):
 
 	def visualize_spectrum(spectrum, _, __):
 		interpolated = dsp.interpolate(spectrum, N_PIXELS)
-		pixels = np.array([
-			np.clip(1*np.log(interpolated*10), 0, 1),
-			np.clip(0.3*np.log(interpolated*10), 0, 1),
-			np.clip(0.3 * interpolated, 0, 1),
-			np.tile(0, N_PIXELS),
-		])
+		# log_intensity = np.clip(1 * np.log(interpolated * 10), 0, 1)
+		zeros = np.tile(0, N_PIXELS)
+
+		pixels = np.array([interpolated, interpolated, interpolated, zeros])
 		return pixels * 255;
 
-	smoothing = dsp.ExpFilter(np.tile(1e-1, N_PIXELS), alpha_decay=0.1, alpha_rise=0.7)
+	smoothing = dsp.ExpFilter(np.tile(1e-1, N_PIXELS), alpha_decay=0.3, alpha_rise=0.8)
 	def visualize_spectrum_smooth(spectrum, _, __):
 		interpolated = dsp.interpolate(spectrum, N_PIXELS)
+		# log_intensity = np.clip(1 * np.log(interpolated * 10), 0, 1)
 		interpolated = smoothing.update(interpolated)
-		pixels = np.array([
-			np.clip(1*np.log(interpolated*10), 0, 1),
-			np.clip(0.3*np.log(interpolated*10), 0, 1),
-			np.clip(0.3 * interpolated, 0, 1),
-			np.tile(0, N_PIXELS),
-		])
+		zeros = np.tile(0, N_PIXELS)
+
+		pixels = np.array([interpolated, interpolated, interpolated, zeros])
 		return pixels * 255;
 
 	def visualize_spectrum_2(y, _, __):
