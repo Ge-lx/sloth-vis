@@ -50,7 +50,7 @@ def on_state_change (config, visualization):
 
         t_fft = time.time() - start
 
-        # Visualize    
+        # Visualize
         mel = mel / 550
         mel = mel**2
         # mel = mel_smoothing.update(mel)

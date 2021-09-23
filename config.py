@@ -69,11 +69,11 @@ def visualizations(config):
 	#  -> np.ndarray[int, 4, N_PIXELS]]
 
 	def visualize_waveform(_, waveform, __):
-	    interpolated = dsp.interpolate(waveform, N_PIXELS)
-	    clipped = np.clip(interpolated - 0.5, 0, 1) * 50
+		interpolated = dsp.interpolate(waveform, N_PIXELS)
+		clipped = np.clip(interpolated - 0.5, 0, 1) * 50
 
-	    zeros = np.zeros(N_PIXELS);
-	    return np.array([clipped, clipped, clipped, zeros]);
+		zeros = np.zeros(N_PIXELS);
+		return np.array([clipped, clipped, clipped, zeros]);
 
 	def visualize_spectrum(spectrum, _, __):
 		interpolated = dsp.interpolate(spectrum, N_PIXELS)
@@ -125,7 +125,7 @@ def visualizations(config):
 		output = np.zeros((4, N_PIXELS), dtype=np.float64)
 
 		fft = np.log(fft / 100)
-		
+
 		if (indices == None):
 			indices = list([0])
 			f = 55

@@ -25,19 +25,19 @@ def _parse_config(config_name='default'):
 	config["fft_samples_per_update"] = int(config["SAMPLE_RATE"] / config["target_fft_fps"])
 
 	if (config["DEBUG"]):
-	    print(f'Sampling audio at {config["SAMPLE_RATE"]} Hz.')
-	    print(f'Target window of {config["FFT_WINDOW_LENGTH"]} ms -> {config["fft_samples_per_window"]} samples per window.')
-	    print(f'Theoretical minimum frequency of {(1 / (config["FFT_WINDOW_LENGTH"] / 1000)):.1F} Hz.')
-	    faster_output = 'GUI' if config["FPS_GUI"] > config["FPS_LED"] else 'LED'
-	    print(f'Target fps of {config["target_fft_fps"]} Hz for {faster_output}.')
+		print(f'Sampling audio at {config["SAMPLE_RATE"]} Hz.')
+		print(f'Target window of {config["FFT_WINDOW_LENGTH"]} ms -> {config["fft_samples_per_window"]} samples per window.')
+		print(f'Theoretical minimum frequency of {(1 / (config["FFT_WINDOW_LENGTH"] / 1000)):.1F} Hz.')
+		faster_output = 'GUI' if config["FPS_GUI"] > config["FPS_LED"] else 'LED'
+		print(f'Target fps of {config["target_fft_fps"]} Hz for {faster_output}.')
 
 	config["fft_samples_per_window"] = 2**int(np.ceil(np.log2(config["fft_samples_per_window"])))
 
 	if (config["DEBUG"]):
-	    config["fft_window_secs"] = config["fft_samples_per_window"] / config["SAMPLE_RATE"]
-	    print(f'Increasing fft window to {config["fft_samples_per_window"]} samples -> \
-	    		{(config["fft_window_secs"] * 1000):.1F} ms, {(1 / config["fft_window_secs"]):.1F} Hz')
-	    print(f'Using audio period size of {config["fft_samples_per_update"]} samples.')
+		config["fft_window_secs"] = config["fft_samples_per_window"] / config["SAMPLE_RATE"]
+		print(f'Increasing fft window to {config["fft_samples_per_window"]} samples -> \
+			{(config["fft_window_secs"] * 1000):.1F} ms, {(1 / config["fft_window_secs"]):.1F} Hz')
+		print(f'Using audio period size of {config["fft_samples_per_update"]} samples.')
 
 	available_visualizations = get_visualizations(config)
 	print(available_visualizations)

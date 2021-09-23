@@ -50,7 +50,7 @@ def init(config, tick_callback):
         app.processEvents()
         tick_callback()
         time.sleep(max(0, last_update - time.time()))
-        
+
 def update(output):
     global ready, input_curve, mel_curve
     if (not ready or not config['USE_GUI']):

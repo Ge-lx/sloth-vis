@@ -16,7 +16,6 @@ def start_control_socket ():
 		data, address = sock.recvfrom(4096)
 		print(f'Received {len(data)} bytes from {address}')
 		msgs = list(data)
-		time.sleep(0)
 		msg_type = msgs[0]
 		if (msg_type == SOCKET_MSG_SLOTH['start']):
 			state.enable_visualization()
@@ -25,3 +24,4 @@ def start_control_socket ():
 		elif (msg_type == SOCKET_MSG_SLOTH['select']):
 			visualization_names = state.get_visualization_names()
 			state.set_visualization(visualization_names[msgs[1]])
+		time.sleep(0.1)

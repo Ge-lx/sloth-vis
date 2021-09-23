@@ -35,7 +35,6 @@ class ExpFilter:
         self.value = alpha * value + (1.0 - alpha) * self.value
         return self.value
 
-
 scale = 200.0
 hertz_to_mel = lambda freq: 2595.0 * np.log10(1 + (freq / scale))
 mel_to_hertz = lambda mel: scale * (10**(mel / 2595.0)) - scale
@@ -53,7 +52,7 @@ def compute_melmat(num_mel_bands=12, freq_min=64, freq_max=8000, num_fft_bands=5
     upper_edges_hz = mel_to_hertz(upper_edges_mel)
 
     freqs = np.linspace(0.0, sample_rate / 2.0, num_fft_bands)
-    
+
     mean = lambda x: x.sum() if len(x) > 0 else 0
     ind_compat = lambda f_lim: [i for i, f in enumerate(freqs) if f < f_lim and f > freq_min]
     ind_low_lim = max([i for i, f in enumerate(freqs) if f <= freq_min])

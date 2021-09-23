@@ -71,12 +71,12 @@ def worker_input(alsa_source):
             try:
                 fifo_visualize.put(data, block=False)
             except queue.Full:
-                cnt_xruns_visualize += 1          
+                cnt_xruns_visualize += 1
 
         # Block on put to output_queue to time on output device clock
         fifo_output_sound.put(data)
 
-        cnt_input += 1  
+        cnt_input += 1
 
 
 def worker_output_sound(alsa_sink):
@@ -86,7 +86,7 @@ def worker_output_sound(alsa_sink):
 
     while True:
         frame = fifo_output_sound.get()
-        
+
         # Block on audio output to use hardware timer
         alsa_sink.write(frame)
         fifo_output_sound.task_done()
@@ -124,6 +124,7 @@ def worker_visualize():
 
 def once_output_led():
     if (state.visualization_enabled() == False):
+        time.sleep(0.5)
         return
 
     global cnt_output_led
@@ -143,6 +144,7 @@ def once_output_led():
 
 def once_output_gui():
     if (state.visualization_enabled() == False):
+        time.sleep(0.5)
         return
 
     global cnt_output_gui
