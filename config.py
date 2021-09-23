@@ -25,19 +25,19 @@ configurations = {
 		# Hardware sample rate
 		'SAMPLE_RATE': 44100,
 		# Alsa Device names (typically hw:0,0 or something like that)
-		'ALSA_SOURCE': 'hw:1,1',
-		'ALSA_SINK': 'rate_convert',
+		'ALSA_SOURCE': 'hw:3,0',#'pulse',
+		'ALSA_SINK': 'pulse',#'rate_convert',
 
 		# LED Output
 		# ----------------------------------
 		# IP address of the ESP8266. Must match IP in ws2812_controller.ino
-		'UDP_IP': '192.168.178.175',
+		'UDP_IP': '192.168.43.21',
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 8080,
 		# Number of pixels in the LED strip (must match ESP8266 firmware)
 		'N_PIXELS': 40,
 		# Target LED framerate. Will warn when this can't be met.
-		'FPS_LED': 100,
+		'FPS_LED': 40,
 		# Set to False because the firmware handles gamma correction + dither"""
 		'SOFTWARE_GAMMA_CORRECTION': False,
 		# Location of the gamma correction table
@@ -81,7 +81,7 @@ def visualizations(config):
 			np.clip(1*np.log(interpolated*10), 0, 1),
 			np.clip(0.3*np.log(interpolated*10), 0, 1),
 			np.clip(0.3 * interpolated, 0, 1),
-			np.tile(0, N_PIXELS)
+			np.tile(0, N_PIXELS),
 		])
 		return pixels * 255;
 
@@ -92,29 +92,29 @@ def visualizations(config):
 		pixels = np.array([
 			np.clip(1*np.log(interpolated*10), 0, 1),
 			np.clip(0.3*np.log(interpolated*10), 0, 1),
+			np.clip(0.3 * interpolated, 0, 1),
 			np.tile(0, N_PIXELS),
-			np.clip(0.3 * interpolated, 0, 1)
 		])
 		return pixels * 255;
 
 	def visualize_spectrum_2(y, _, __):
-	    interpolated = dsp.interpolate(y, N_PIXELS)
-	    log_part = np.log(interpolated*10)
+		interpolated = dsp.interpolate(y, N_PIXELS)
+		log_part = np.log(interpolated*10)
 
-	    log_part /= 3
-	    log_part = 0.5 + np.clip(log_part, 0, 0.5)
+		log_part /= 3
+		log_part = 0.5 + np.clip(log_part, 0, 0.5)
 
-	    def color_from_value (x):
-	        return hsv2rgb(x, 1, x)
+		def color_from_value (x):
+			return hsv2rgb(x, 1, x)
 
-	    colors = np.array([color_from_value(h) for h in log_part]).transpose()
-	    pixels = np.array([
-	        colors[0],
-	        colors[1],
-	        colors[2],
-	        np.clip(0.3 * interpolated, 0, 1),
-	    ])
-	    return pixels * 255;
+			colors = np.array([color_from_value(h) for h in log_part]).transpose()
+			pixels = np.array([
+				colors[0],
+				colors[1],
+				colors[2],
+				np.clip(0.3 * interpolated, 0, 1),
+			])
+			return pixels * 255;
 
 	indices = None
 	fft_smoothing = dsp.ExpFilter(np.tile(1e-1, int(config['fft_samples_per_window'] / 2)), alpha_decay=0.1, alpha_rise=0.7)

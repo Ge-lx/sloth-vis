@@ -15,7 +15,7 @@ import led
 
 config = state.default_config
 
-fifo_visualize = queue.Queue(5)
+fifo_visualize = queue.Queue(9)
 fifo_output_sound = queue.Queue(12)
 
 # fifo to block on for hardware-timed updates every period-length
@@ -201,7 +201,7 @@ if __name__ == '__main__':
     print(f'Threads started.\n\n')
 
     if config["USE_GUI"]:
-        gui.init(tick_callback=print_debug if config["DEBUG"] else lambda: None)
+        gui.init(config=config, tick_callback=print_debug if config["DEBUG"] else lambda: None)
     else:
         setInterval(print_debug, 1)
         control_socket.start_control_socket()
