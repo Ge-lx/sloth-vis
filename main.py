@@ -2,10 +2,10 @@ from threading import Lock
 import queue
 import time
 
-import alsaaudio
+import audio_backend.backend_pulseaudio as pulseaudio
 import numpy as np
 
-from utils import setInterval, runAsync
+from utils import setInterval, runAsync, setTimeout
 # from web import app
 import control_socket
 import state
@@ -15,8 +15,7 @@ import led
 
 config = state.default_config
 
-fifo_visualize = queue.Queue(9)
-fifo_output_sound = queue.Queue(12)
+fifo_visualize = queue.Queue(1)
 
 # fifo to block on for hardware-timed updates every period-length
 fifo_output_vis = queue.Queue(1)
@@ -101,11 +100,10 @@ def performance_logger():
 logger = performance_logger()
 
 def reset_counters():
-    global cnt_input, cnt_xruns_visualize, cnt_output_sound, cnt_visualize, \
+    global cnt_input, cnt_xruns_visualize, cnt_visualize, \
            cnt_xruns_output, cnt_output_led, cnt_output_gui
     cnt_input = 0
     cnt_xruns_visualize = 0
-    cnt_output_sound = 0
 
     cnt_visualize = 0
     cnt_xruns_output = 0
@@ -121,54 +119,36 @@ def print_debug():
         last_second += 1
 
         if (config["DEBUG"]):
-            logger['log'](100)
+            logger['log'](2)
             logger['reset']()
-            print(f'Queue throughput  : IN {cnt_input:3.0F} -> OUT {cnt_output_sound:3.0F}  |  VIS  {cnt_visualize:3.0F} ({cnt_xruns_visualize:1.0F})  |  OUT ({cnt_xruns_output:1.0F}) - LED {cnt_output_led:3.0F} - GUI {cnt_output_gui:3.0F}\n')
+            print(f'Queue throughput  : IN {cnt_input:3.0F}  |  VIS  {cnt_visualize:3.0F} ({cnt_xruns_visualize:1.0F})  |  OUT ({cnt_xruns_output:1.0F}) - LED {cnt_output_led:3.0F} - GUI {cnt_output_gui:3.0F}\n')
         reset_counters()
 
 
-
-def worker_input(alsa_source):
+def process_source_buffer (l, data):
     global cnt_input, cnt_xruns_visualize
-    while True:
-        # Blocks on read when no input data available
-        l, data = alsa_source.read()
-        if l < 1: continue
 
-        if (state.visualization_enabled()):
-            try:
-                fifo_visualize.put(data, block=False)
-            except queue.Full:
-                cnt_xruns_visualize += 1
+    if (state.visualization_enabled()):
+        try:
+            fifo_visualize.put(data, block=True)
+        except queue.Full:
+            cnt_xruns_visualize += 1
 
-        # Block on put to output_queue to time on output device clock
-        fifo_output_sound.put(data)
-
-        cnt_input += 1
-
-
-def worker_output_sound(alsa_sink):
-    global cnt_output_sound
-    while not fifo_output_sound.full():
-        time.sleep(0.1)
-
-    while True:
-        frame = fifo_output_sound.get()
-
-        # Block on audio output to use hardware timer
-        alsa_sink.write(frame)
-        fifo_output_sound.task_done()
-        cnt_output_sound += 1
+    cnt_input += 1
 
 def worker_visualize():
     global cnt_visualize, cnt_xruns_output, current_output_vis
+
     while True:
         # Block on read when no data is available 
+        while not fifo_visualize.full():
+            time.sleep(0.001)
+
         frame = fifo_visualize.get()
 
-        # # Don't process if visualization is disabled
-        #  == False):
-        #     continue
+        # Don't process if visualization is disabled
+        if (state.visualization_enabled() == False):
+            continue
 
         # Audio processing
         array_stereo = np.frombuffer(frame, dtype=np.dtype('<i2'))
@@ -230,24 +210,10 @@ def once_output_gui():
     cnt_output_gui += 1
 
 if __name__ == '__main__':
-    # Start sound workers
-    alsa_source = alsaaudio.PCM(alsaaudio.PCM_CAPTURE,
-        format = alsaaudio.PCM_FORMAT_S16_LE,
-        channels = config["CHANNELS"],
-        rate = config["SAMPLE_RATE"],
-        device = config["ALSA_SOURCE"],
-        periodsize = config["fft_samples_per_update"])
 
-    alsa_sink = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK,
-        format = alsaaudio.PCM_FORMAT_S16_LE,
-        channels = config["CHANNELS"],
-        rate = config["SAMPLE_RATE"],
-        device = config["ALSA_SINK"],
-        periodsize = config["fft_samples_per_update"])
-
-    runAsync(lambda: worker_output_sound(alsa_sink))
-    runAsync(lambda: worker_input(alsa_source))
-
+    # Start pulseaudio backend
+    pulseaudio.start_backend(config, process_source_buffer)
+    
     # Start visualization worker
     runAsync(worker_visualize)
 
@@ -270,8 +236,10 @@ if __name__ == '__main__':
 
     print(f'Threads started.\n\n')
 
+    setTimeout(lambda: state.enable_visualization(), 1)
+
     if config["USE_GUI"]:
-        gui.init(config=config, tick_callback=print_debug if config["DEBUG"] else lambda: None)
+        gui.init(cfg=config, tick_callback=print_debug if config["DEBUG"] else lambda: None)
     else:
         setInterval(print_debug, 1)
         control_socket.start_control_socket()

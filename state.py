@@ -51,7 +51,7 @@ import led
 handlers = list([])
 
 visualization_state = {
-	'enabled': False,
+	'enabled': True,
 	'current_config': default_config,
 	'current_visualization_name': list(available_visualizations.keys())[0]
 }
