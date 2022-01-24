@@ -54,7 +54,6 @@ def performance_logger():
 
         total_time = sum([sum(times) for _, times in measurements.items()])
         counts = len(measurements[list(measurements.keys())[0]])
-        # mean_frame_time = total_time / counts
 
         results = sorted([({
             'name': name, \
@@ -62,38 +61,16 @@ def performance_logger():
             'share': np.sum(diff_times) / total_time \
         }) for name, diff_times in measurements.items()], key=lambda x: x['name'])
 
-        # results.sort(lambda x: x['name'])
-
         out_names = '|'
         out_times = '|'
         space_loan = 0
 
         def generate_strings(e):
             nonlocal out_names, out_times, space_loan
-            # l = int(length * e['share'] + 0.5) - space_loan
-
             out_names += f'{e["name"]} : {e["mean"] * 1000:.1F}ms'.center(20) + '|'
-
-            # time = f'{e["mean"] * 1000:.1F}ms'.center(l-1) + '|'
-            # name = f'{e["name"]}'.center(len(time)-1) + '|'
-
-            # out_names += name
-            # out_times += time
-
-            # final_length = max(len(name), len(time))
-            # if (final_length > l):
-            #     space_loan = final_length - l
-            # else:
-            #     space_loan = 0
-
         [generate_strings(e) for e in results]
 
-        # assert(len(out_names) == length)
-        # assert(len(out_times) == length)
-
         print(out_names)
-        # print(out_times)
-
 
     return {'reset': reset, 'measure': measure, 'log': log}
 
