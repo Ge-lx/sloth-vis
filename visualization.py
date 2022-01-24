@@ -47,7 +47,6 @@ def on_state_change (config, visualization):
         N = len(y_data)
         fft = np.abs(np.fft.rfft(y_data * fft_window)[:N // 2]) #np.zeros(N//2)#
         mel = mel_trafo(fft)
-        mel = mel / 550
         mel = mel**2
 
         logger('fft')

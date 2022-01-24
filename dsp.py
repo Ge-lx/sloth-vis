@@ -62,6 +62,6 @@ def compute_melmat(num_mel_bands=12, freq_min=64, freq_max=8000, num_fft_bands=5
     def transform (fft_spectrum):
         bin_slice = lambda i: fft_spectrum[(indices[i-1] if i > 0 else ind_low_lim):indices[i]]
         bin_means = [mean(bin_slice(i)) * freq_weight(i) for i in range(num_mel_bands)]
-        return np.array(bin_means)
+        return np.array(bin_means) / (num_fft_bands / 6)
 
     return transform, (center_frequencies_hz, freqs)

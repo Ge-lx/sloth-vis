@@ -10,7 +10,7 @@ configurations = {
 		# GUI Configuration
 		# ----------------------------------
 		# Whether or not to display a PyQtGraph GUI plot of visualization
-		'USE_GUI': False,
+		'USE_GUI': True,
 		# Whether to display debug information
 		'DEBUG': True,
 		# Target GUI framerate. Will warn when this can't be met.
@@ -45,10 +45,10 @@ configurations = {
 		# Frequencies above this value will be removed during audio processing
 		'MAX_FREQUENCY': 10000,
 		# Number of frequency bins to use when transforming audio to frequency domain
-		'FFT_N_BINS': 40,
+		'FFT_N_BINS': 128,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
-		'FFT_WINDOW_LENGTH': 100
+		'FFT_WINDOW_LENGTH': 120
 	}
 }
 
