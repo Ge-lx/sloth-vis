@@ -5,18 +5,17 @@ import numpy as np
 from state import default_config as config
 
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-dead_pixels = [] #1, 8, 20, 33, 38, 78, 84, 124]
+WLED_TIMEOUT_S = 10
 
 def send_pixels(pixels):
-    m = np.ndarray([config['N_PIXELS'], 4], np.uint8);
+    m = np.ndarray([config['N_PIXELS'], 3], np.uint8);
     for i in range(config['N_PIXELS']):
-        r, g, b, w = pixels[0][i], pixels[1][i], pixels[2][i], pixels[3][i]
+        r, g, b = pixels[0][i], pixels[1][i], pixels[2][i]
         m[i][0] = r
         m[i][1] = g
         m[i][2] = b
-        m[i][3] = w
 
-    udp_socket.sendto(bytes(m.flatten()), (config['UDP_IP'], config['UDP_PORT']));
+    udp_socket.sendto(bytes([2, WLED_TIMEOUT_S]) + bytes(m.flatten()), (config['UDP_IP'], config['UDP_PORT']));
 
 def update(output):
     pixels = output[2].astype(int)

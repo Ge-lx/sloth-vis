@@ -29,18 +29,14 @@ configurations = {
 
 		# LED Output
 		# ----------------------------------
-		# IP address of the ESP8266. Must match IP in ws2812_controller.ino
-		'UDP_IP': '192.168.43.21',
+		# IP address of the WLED ESP8266.
+		'UDP_IP': '192.168.178.175',
 		# Port number used for socket communication between Python and ESP8266
-		'UDP_PORT': 8080,
-		# Number of pixels in the LED strip (must match ESP8266 firmware)
-		'N_PIXELS': 40,
+		'UDP_PORT': 21324,
+		# Number of pixels in the LED strip (should match WLED settigs)
+		'N_PIXELS': 31,
 		# Target LED framerate. Will warn when this can't be met.
-		'FPS_LED': 40,
-		# Set to False because the firmware handles gamma correction + dither"""
-		'SOFTWARE_GAMMA_CORRECTION': False,
-		# Location of the gamma correction table
-		'GAMMA_TABLE_PATH': os.path.join(os.path.dirname(__file__), 'gamma_table.npy'),
+		'FPS_LED': 60,
 
 		# FFT Settings 
 		# ----------------------------------
