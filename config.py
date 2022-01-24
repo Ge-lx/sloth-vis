@@ -16,7 +16,7 @@ configurations = {
 		# Target GUI framerate. Will warn when this can't be met.
 		'FPS_GUI': 60,
 
-		# Alsa Configuration
+		# PulseAudio Configuration
 		# ----------------------------------------------
 		# Number of channels
 		'CHANNELS': 2,
@@ -24,9 +24,8 @@ configurations = {
 		# Any unavoidable differences should be dealt with using alsa's pcm_rate.
 		# Hardware sample rate
 		'SAMPLE_RATE': 44100,
-		# Alsa Device names (typically hw:0,0 or something like that)
-		'ALSA_SOURCE': 'hw:3,0',#'pulse',
-		'ALSA_SINK': 'pulse',#'rate_convert',
+		# Full PulseAudio sink name to attach monitor to 
+		'PULSEAUDIO_SINK': 'bluez_sink.2C_FD_B3_21_DC_FB.a2dp_sink',
 
 		# LED Output
 		# ----------------------------------

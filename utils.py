@@ -17,6 +17,13 @@ def memoize(function):
             return rv
     return wrapper
 
+def setTimeout (callback, delay):
+    def timerExecutor ():
+        time.sleep(delay)
+        callback()
+
+    timerThread = Thread(target=timerExecutor, daemon=False)
+    timerThread.start()
 
 def setInterval (callback, interval):
     cancelled = False

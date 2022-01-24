@@ -6,9 +6,9 @@ import numpy as np
 ready = False
 config = dict()
 
-def init(config, tick_callback):
-    global app, view, input_curve, mel_curve, ready
-    config = config
+def init(cfg, tick_callback):
+    global app, view, input_curve, mel_curve, ready, config
+    config = cfg
 
     import pyqtgraph as pg
     from pyqtgraph.Qt import QtGui, QtCore
@@ -52,7 +52,7 @@ def init(config, tick_callback):
         time.sleep(max(0, last_update - time.time()))
 
 def update(output):
-    global ready, input_curve, mel_curve
+    global ready, input_curve, mel_curve, config
     if (not ready or not config['USE_GUI']):
         return
 
