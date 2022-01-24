@@ -189,8 +189,18 @@ def once_output_gui():
 
 if __name__ == '__main__':
 
+
+    def timing_update_handler(timing_info):
+        general = timing_info['general']
+        stream_latency = timing_info['stream_latency']
+        buffer_attributes = timing_info['buffer_attributes']
+
+        print(f'Timing:     Latency: {stream_latency / 1000:.2F} ms  |  Fragment size: {buffer_attributes["fragsize"]}')
+        print(general)
+        # print(f'            Source latency: {general[''] / 1000:.2F} ms  |  Fragment size: {buffer_attributes["fragsize"]}')
+
     # Start pulseaudio backend
-    pulseaudio.start_backend(config, process_source_buffer)
+    pulseaudio.start_backend(config, process_source_buffer, timing_update_handler)
     
     # Start visualization worker
     runAsync(worker_visualize)

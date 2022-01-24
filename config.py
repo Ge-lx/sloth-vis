@@ -18,14 +18,21 @@ configurations = {
 
 		# PulseAudio Configuration
 		# ----------------------------------------------
-		# Number of channels
-		'CHANNELS': 2,
+
 		# Input and output have to use the same sample-rate and number of channels.
 		# Any unavoidable differences should be dealt with using alsa's pcm_rate.
 		# Hardware sample rate
 		'SAMPLE_RATE': 44100,
-		# Full PulseAudio sink name to attach monitor to 
-		'PULSEAUDIO_SINK': 'bluez_sink.2C_FD_B3_21_DC_FB.a2dp_sink',
+		# Number of channels
+		'CHANNELS': 2,
+
+		# PulseAudio input mode. Choose from
+		# ['default_sink', 'default_source', ' source_by_sink', 'source_by_name']
+		'AUDIO_INPUT_MODE': 'default_sink',
+
+		# Full PulseAudio sink/source name.
+		# Only used for ['sink_by_name', 'source_by_name']
+		'AUDIO_INPUT_NAME': '',
 
 		# LED Output
 		# ----------------------------------
