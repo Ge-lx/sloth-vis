@@ -16,7 +16,7 @@ configurations = {
 		# Target GUI framerate. Will warn when this can't be met.
 		'FPS_GUI': 60,
 
-		# PulseAudio Configuration
+        # PulseAudio Configuration
 		# ----------------------------------------------
 
 		# Input and output have to use the same sample-rate and number of channels.
@@ -27,7 +27,7 @@ configurations = {
 		'CHANNELS': 2,
 
 		# PulseAudio input mode. Choose from
-		# ['default_sink', 'default_source', ' source_by_sink', 'source_by_name']
+		# ['default_sink', 'default_source', ' sink_by_name', 'source_by_name']
 		'AUDIO_INPUT_MODE': 'default_sink',
 
 		# Full PulseAudio sink/source name.
@@ -37,25 +37,25 @@ configurations = {
 		# LED Output
 		# ----------------------------------
 		# IP address of the WLED ESP8266.
-		'UDP_IP': '192.168.178.175',
+        'UDP_IP': '192.168.178.177',
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 21324,
 		# Number of pixels in the LED strip (should match WLED settigs)
-		'N_PIXELS': 31,
+        'N_PIXELS': 39,
 		# Target LED framerate. Will warn when this can't be met.
-		'FPS_LED': 60,
+        'FPS_LED': 60,
 
 		# FFT Settings 
 		# ----------------------------------
 		# Frequencies below this value will be removed during audio processing
-		'MIN_FREQUENCY': 20,
+		'MIN_FREQUENCY': 50,
 		# Frequencies above this value will be removed during audio processing
-		'MAX_FREQUENCY': 10000,
+        'MAX_FREQUENCY': 15000,
 		# Number of frequency bins to use when transforming audio to frequency domain
-		'FFT_N_BINS': 128,
+		'FFT_N_BINS': 120,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
-		'FFT_WINDOW_LENGTH': 120
+        'FFT_WINDOW_LENGTH': 90 
 	}
 }
 
@@ -153,9 +153,9 @@ def visualizations(config):
 		return output * 255
 
 	return {
+		'smooth': visualize_spectrum_smooth,
 		'spectrum': visualize_spectrum,
 		'waveform': visualize_waveform,
 		'spectrum2': visualize_spectrum_2,
-		'smooth': visualize_spectrum_smooth,
 		'folded': folded_fourier
 	}
