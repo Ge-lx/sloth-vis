@@ -37,25 +37,25 @@ configurations = {
 		# LED Output
 		# ----------------------------------
 		# IP address of the WLED ESP8266.
-        'UDP_IP': '192.168.178.177',
+        'UDP_IP': '192.168.0.53',
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 21324,
 		# Number of pixels in the LED strip (should match WLED settigs)
-        'N_PIXELS': 39,
+        'N_PIXELS': 40,
 		# Target LED framerate. Will warn when this can't be met.
-        'FPS_LED': 60,
+        'FPS_LED': 90,
 
 		# FFT Settings 
 		# ----------------------------------
 		# Frequencies below this value will be removed during audio processing
 		'MIN_FREQUENCY': 50,
 		# Frequencies above this value will be removed during audio processing
-        'MAX_FREQUENCY': 15000,
+        'MAX_FREQUENCY': 18000,
 		# Number of frequency bins to use when transforming audio to frequency domain
-		'FFT_N_BINS': 120,
+		'FFT_N_BINS': 100,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
-        'FFT_WINDOW_LENGTH': 90 
+        'FFT_WINDOW_LENGTH': 30
 	}
 }
 
