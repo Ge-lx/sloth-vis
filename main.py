@@ -47,7 +47,7 @@ def performance_logger():
         else:
             measurements[name] = [diff]
 
-    def log():
+    def log(prefix = ''):
         nonlocal last, start, measurements
         if (len(measurements.keys()) == 0):
             return
@@ -61,16 +61,14 @@ def performance_logger():
             'share': np.sum(diff_times) / total_time \
         }) for name, diff_times in measurements.items()], key=lambda x: x['name'])
 
-        out_names = '|'
-        out_times = '|'
-        space_loan = 0
+        out_string = '|'
 
         def generate_strings(e):
-            nonlocal out_names, out_times, space_loan
-            out_names += f'{e["name"]} : {e["mean"] * 1000:.1F}ms'.center(20) + '|'
+            nonlocal out_string
+            out_string += f'{e["name"]} {e["mean"] * 1000:.1F}ms'.center(20) + '|'
         [generate_strings(e) for e in results]
 
-        print(out_names)
+        print(f'{prefix} {out_string}')
 
     return {'reset': reset, 'measure': measure, 'log': log}
 
@@ -90,15 +88,19 @@ def reset_counters():
 reset_counters()
 
 last_second = time.time()
+latency = 0
+fragment_size = 0
 def print_debug():
     global last_second
     if (time.time() - last_second > 1):
         last_second += 1
 
         if (config["DEBUG"]):
-            logger['log']()
+            print(f'----------------------------------------------------------------------------------------------------------|')
+            print(f'Audio timings         |  latency {latency:3.2F}ms  |  fragsize  {fragment_size:5.0F}   |                    |                    |')
+            logger['log']('Visualization timings')
             logger['reset']()
-            print(f'Queue throughput  : IN {cnt_input:3.0F}  |  VIS  {cnt_visualize:3.0F} ({cnt_xruns_visualize:1.0F})  |  OUT ({cnt_xruns_output:1.0F}) - LED {cnt_output_led:3.0F} - GUI {cnt_output_gui:3.0F}\n')
+            print(f'Queue throughput      |       IN {cnt_input:3.0F}       |    VIS  {cnt_visualize:3.0F} ({cnt_xruns_visualize:1.0F})    |     OUT ({cnt_xruns_output:1.0F}) - LED {cnt_output_led:3.0F} - GUI {cnt_output_gui:3.0F}         |')
 
         reset_counters()
 
@@ -191,12 +193,14 @@ if __name__ == '__main__':
 
 
     def timing_update_handler(timing_info):
-        general = timing_info['general']
-        stream_latency = timing_info['stream_latency']
+        global latency, fragment_size
         buffer_attributes = timing_info['buffer_attributes']
+        fragment_size = buffer_attributes['fragsize']
+        latency = timing_info['stream_latency'] / 1000
 
-        print(f'Timing:     Latency: {stream_latency / 1000:.2F} ms  |  Fragment size: {buffer_attributes["fragsize"]}')
-        print(general)
+        # general = timing_info['general']
+        # print(f'Timing:     Latency: {stream_latency / 1000:.2F} ms  |  Fragment size: {buffer_attributes["fragsize"]}')
+        # print(general)
         # print(f'            Source latency: {general[''] / 1000:.2F} ms  |  Fragment size: {buffer_attributes["fragsize"]}')
 
     # Start pulseaudio backend
