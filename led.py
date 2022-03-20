@@ -15,7 +15,13 @@ def send_pixels(pixels):
         m[i][1] = g
         m[i][2] = b
 
-    udp_socket.sendto(bytes([2, WLED_TIMEOUT_S]) + bytes(m.flatten()), (config['UDP_IP'], config['UDP_PORT']));
+
+
+    data_to_send = bytes([2, WLED_TIMEOUT_S]) + bytes(m.flatten())
+    cfg_udp_ip = config['UDP_IP']
+    udp_ips = [cfg_udp_ip] if not isinstance(cfg_udp_ip, list) else cfg_udp_ip
+    for ip in udp_ips:
+        udp_socket.sendto(data_to_send, (ip, config['UDP_PORT']));
 
 def update(output):
     pixels = output[2].astype(int)

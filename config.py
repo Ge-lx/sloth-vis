@@ -36,8 +36,8 @@ configurations = {
 
 		# LED Output
 		# ----------------------------------
-		# IP address of the WLED ESP8266.
-        'UDP_IP': '192.168.0.53',
+		# IP address(s) of the WLED ESP8266.
+        'UDP_IP': ['192.168.0.53', '192.168.0.57'],
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 21324,
 		# Number of pixels in the LED strip (should match WLED settigs)
@@ -55,7 +55,7 @@ configurations = {
 		'FFT_N_BINS': 100,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
-        'FFT_WINDOW_LENGTH': 30
+        'FFT_WINDOW_LENGTH': 25
 	}
 }
 
