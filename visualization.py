@@ -12,7 +12,7 @@ def on_state_change (config, visualization):
     print('on_state_change')
     global process_sample
     # FFT window shape
-    fft_window = np.hamming(config['fft_samples_per_window'])
+    fft_window = np.hanning(config['fft_samples_per_window'])
 
     # FFT binning (mel-bank-transformation)
     mel_trafo, (mel_x, fft_x) = dsp.compute_melmat(
