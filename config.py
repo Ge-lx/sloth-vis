@@ -14,7 +14,7 @@ configurations = {
 		# Whether to display debug information
 		'DEBUG': True,
 		# Target GUI framerate. Will warn when this can't be met.
-		'FPS_GUI': 60,
+		'FPS_GUI': 90,
 
         # PulseAudio Configuration
 		# ----------------------------------------------
@@ -37,13 +37,13 @@ configurations = {
 		# LED Output
 		# ----------------------------------
 		# IP address(s) of the WLED ESP8266.
-        'UDP_IP': ['192.168.0.53', '192.168.0.57'],
+        'UDP_IP': ['192.168.0.53'],#'192.168.8.121'
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 21324,
 		# Number of pixels in the LED strip (should match WLED settigs)
         'N_PIXELS': 40,
 		# Target LED framerate. Will warn when this can't be met.
-        'FPS_LED': 90,
+        'FPS_LED': 10,
 
 		# FFT Settings 
 		# ----------------------------------
@@ -55,7 +55,7 @@ configurations = {
 		'FFT_N_BINS': 100,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
-        'FFT_WINDOW_LENGTH': 25
+        'FFT_WINDOW_LENGTH': 100
 	}
 }
 

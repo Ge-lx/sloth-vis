@@ -6,7 +6,7 @@ import state
 import dsp
 
 # Handler for audio samples. Will be updated in 'on_state_change'
-process_sample = lambda samples, logger: None
+process_sample = lambda samples, idx, logger: None
 
 def on_state_change (config, visualization):
     print('on_state_change')
@@ -19,7 +19,7 @@ def on_state_change (config, visualization):
         num_mel_bands=config['FFT_N_BINS'],
         freq_min=config['MIN_FREQUENCY'],
         freq_max=config['MAX_FREQUENCY'],
-        num_fft_bands=int(config['fft_samples_per_window'] / 2),
+        num_fft_bands=int(config['fft_samples_per_window'] // 2 + 1),
         sample_rate=config['SAMPLE_RATE']
     )
 
@@ -29,7 +29,7 @@ def on_state_change (config, visualization):
     # Audio sample rolling window
     y_roll = np.random.rand(config['fft_samples_per_window']) / 1e16
 
-    def update(audio_samples, logger):
+    def update(audio_samples, idx, logger):
         nonlocal y_roll
         logger('idle')
 
@@ -37,6 +37,7 @@ def on_state_change (config, visualization):
         y_update = audio_samples / 2.0**15 + 0.5
         # Construct a rolling window of audio samples
         l = len(y_update)
+        # print((l, len(y_roll)))
         y_roll[:-l] = y_roll[l:]
         y_roll[-l:] = y_update
         y_data = y_roll.astype(np.float32)
@@ -45,7 +46,9 @@ def on_state_change (config, visualization):
 
         # Fourier transform and mel transformation
         N = len(y_data)
-        fft = np.abs(np.fft.rfft(y_data * fft_window)[:N // 2]) #np.zeros(N//2)#
+        # fft_ = 
+        # print(f'len(fft_): {len(fft_)}')
+        fft = np.abs(np.fft.rfft(y_data * fft_window)) #np.zeros(N//2)#
         mel = mel_trafo(fft)
         # mel = mel**2
 
@@ -57,7 +60,7 @@ def on_state_change (config, visualization):
 
         logger('vis')
 
-        return (y_data, mel, led_output)
+        return (y_data, mel, led_output, fft, idx)
 
     # Update sample handler
     process_sample = update

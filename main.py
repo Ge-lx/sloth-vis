@@ -105,12 +105,12 @@ def print_debug():
         reset_counters()
 
 
-def process_source_buffer (l, data):
+def process_source_buffer (l, data, idx):
     global cnt_input, cnt_xruns_visualize
 
     if (state.visualization_enabled()):
         try:
-            fifo_visualize.put(data, block=True)
+            fifo_visualize.put((data, idx), block=True)
         except queue.Full:
             cnt_xruns_visualize += 1
 
@@ -124,7 +124,7 @@ def worker_visualize():
         while not fifo_visualize.full():
             time.sleep(0.001)
 
-        frame = fifo_visualize.get()
+        (frame, idx) = fifo_visualize.get()
 
         # Don't process if visualization is disabled
         if (state.visualization_enabled() == False):
@@ -134,7 +134,7 @@ def worker_visualize():
         array_stereo = np.frombuffer(frame, dtype=np.dtype('<i2'))
         array_mono = array_stereo[::2]/2 + array_stereo[1::2]/2
 
-        res = visualization.process_sample(array_mono, logger['measure'])
+        res = visualization.process_sample(array_mono, idx, logger['measure'])
         if (res == None):
             continue
         output = res

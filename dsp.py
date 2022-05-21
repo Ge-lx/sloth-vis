@@ -1,4 +1,3 @@
-# from scipy.ndimage.filters import gaussian_filter1d
 import numpy as np
 from utils import memoize
 

@@ -136,7 +136,7 @@ class PulseAudioMonitorClient (object):
         # relating to the connection to Pulseaudio
         _mainloop = pa_threaded_mainloop_new()
         _mainloop_api = pa_threaded_mainloop_get_api(_mainloop)
-        self.context = pa_context_new(_mainloop_api, b'peak demo')
+        self.context = pa_context_new(_mainloop_api, b'sloth realtime audio analyzer')
         pa_context_set_state_callback(self.context, self._context_notify_cb, None)
         pa_context_connect(self.context, None, 0, None)
         pa_threaded_mainloop_start(_mainloop)
@@ -166,6 +166,8 @@ class PulseAudioMonitorClient (object):
 
         ## buffer attributes
         buffer_attr = pa_stream_get_buffer_attr(pa_stream_p).contents
+        sample_spec = pa_stream_get_sample_spec(pa_stream_p).contents
+        print_structure(sample_spec)
         timing_info['buffer_attributes'] = as_dict(buffer_attr)
 
         self.cb_handler.add_data('timing_info', timing_info)
@@ -174,9 +176,10 @@ class PulseAudioMonitorClient (object):
         data = c_void_p()
         pa_stream_peek(stream, data, c_ulong(length))
         l = int(length / 2)
+        # print(index_incr)
 
         data = cast(data, POINTER(c_ushort * l))
-        self.callback_data(l, data.contents)
+        self.callback_data(l, data.contents, index_incr + l)
         pa_stream_drop(stream)
 
     def on_callback_data_received(self, idf, data):
@@ -247,11 +250,13 @@ class PulseAudioMonitorClient (object):
         bufferattr.minreq = c_uint32(-1)
         bufferattr.fragsize = c_uint32(bytes_per_fragment)
 
+        print_structure(samplespec)
         pa_stream = pa_stream_new(context, b"peak detect demo", byref(samplespec), None)
+        print_structure(samplespec)
         pa_stream_set_read_callback(pa_stream, self._stream_read_cb, byref(pa_stream))
         pa_stream_set_latency_update_callback(pa_stream, self._stream_timing_info_cb, byref(pa_stream))
 
-        stream_flags = PA_STREAM_ADJUST_LATENCY | PA_STREAM_AUTO_TIMING_UPDATE
+        stream_flags = PA_STREAM_AUTO_TIMING_UPDATE
         ret = pa_stream_connect_record(pa_stream, name, byref(bufferattr), stream_flags)
 
         if not ret == 0:
