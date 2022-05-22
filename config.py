@@ -14,7 +14,7 @@ configurations = {
 		# Whether to display debug information
 		'DEBUG': True,
 		# Target GUI framerate. Will warn when this can't be met.
-		'FPS_GUI': 60,
+		'FPS_GUI': 90,
 
         # PulseAudio Configuration
 		# ----------------------------------------------
@@ -28,7 +28,7 @@ configurations = {
 
 		# PulseAudio input mode. Choose from
 		# ['default_sink', 'default_source', ' sink_by_name', 'source_by_name']
-		'AUDIO_INPUT_MODE': 'default_source',
+		'AUDIO_INPUT_MODE': 'default_sink',
 
 		# Full PulseAudio sink/source name.
 		# Only used for ['sink_by_name', 'source_by_name']

@@ -12,7 +12,7 @@ config = state.default_config
 FFT_LEN_INTERPOLATION = 1 * (config['fft_samples_per_window'] // 2 + 1)
 pa_idx = 0
 
-fft_filter = dsp.ExpFilter(np.tile(1e-1, FFT_LEN_INTERPOLATION), alpha_decay=0.1, alpha_rise=0.4)
+fft_filter = dsp.ExpFilter(np.tile(1e-1, FFT_LEN_INTERPOLATION), alpha_decay=0.3, alpha_rise=0.55)
 
 def init(cfg, tick_callback):
     global app, view, input_curve, mel_curve, ready, config, fft_curve
@@ -33,15 +33,15 @@ def init(cfg, tick_callback):
 
 
     # Audio input plot
-    input_plot = layout.addPlot(title='Audio Input', colspan=1)
-    input_plot.setRange(yRange=[-0.1, 240], xRange=[0, 1000])
-    input_plot.disableAutoRange(axis=pg.ViewBox.YAxis)
-    input_plot.disableAutoRange(axis=pg.ViewBox.XAxis)
+    # input_plot = layout.addPlot(title='Audio Input', colspan=1)
+    # input_plot.setRange(yRange=[-0.1, 240], xRange=[0, 1000])
+    # input_plot.disableAutoRange(axis=pg.ViewBox.YAxis)
+    # input_plot.disableAutoRange(axis=pg.ViewBox.XAxis)
 
-    x_data = np.array(range(1, 2 * (config['fft_samples_per_window'] + 1)))
-    input_curve = pg.PlotCurveItem()
-    input_curve.setData(x=x_data, y=x_data*0)
-    input_plot.addItem(input_curve)
+    # x_data = np.array(range(1, 2 * (config['fft_samples_per_window'] + 1)))
+    # input_curve = pg.PlotCurveItem()
+    # input_curve.setData(x=x_data, y=x_data*0)
+    # input_plot.addItem(input_curve)
 
     # FFT Plot
     fft_plot_2 = layout.addPlot(title='Audio Input', colspan=3)
@@ -88,11 +88,14 @@ def update(output):
 
     # Frequency weighing
     freqs = np.linspace(0, config['SAMPLE_RATE'] // 2, FFT_LEN_INTERPOLATION)
-    cutoff_freq_upper_hz = 1000
-    cutoff_freq_lower_hz = config['MIN_FREQUENCY'];
+    cutoff_freq_upper_hz = 5000
+    cutoff_freq_lower_hz = 20 # config['MIN_FREQUENCY'];
     cutoff_idx_upper = np.argwhere(freqs > cutoff_freq_upper_hz)[0][0]
     cutoff_idx_lower = np.argwhere(freqs > cutoff_freq_lower_hz)[0][0]
-    freq_weighing = np.concatenate((np.zeros(cutoff_idx_lower), np.linspace(2, 0.5, cutoff_idx_upper - cutoff_idx_lower), np.zeros(FFT_LEN_INTERPOLATION - cutoff_idx_upper)))
+    freq_weighing = np.concatenate((
+        np.zeros(cutoff_idx_lower),
+        np.linspace(1, 0.5, cutoff_idx_upper - cutoff_idx_lower),
+        np.zeros(FFT_LEN_INTERPOLATION - cutoff_idx_upper)))
 
     # Peak finding and sorting 
     freq_peaks, _ = find_peaks(fft, height=10, prominence=0.3, distance=5)
@@ -105,7 +108,7 @@ def update(output):
 
 
     if (len(sorted_peaks) > 0):
-        fft_peaks_str = ', '.join([f'{f:3.2F}' for f in sorted_peaks[:5]])
+        fft_peaks_str = ', '.join([f'{f:4.1F}' for f in sorted_peaks[:5]])
         print(f'Weighted FFT peaks: [{fft_peaks_str}]')
 
     freq_to_samples = lambda f: int(config['SAMPLE_RATE'] // f)
@@ -114,23 +117,26 @@ def update(output):
         f = sorted_peaks[idx]
         phi = sorted_angles[idx]
 
-        o = phi / (2 * np.pi) + 1
         samp = freq_to_samples(f)
+        m = float(l_audio) / (samp) - 2
+        n = min(m, 6)
+
+        o = phi / (2*np.pi)
         s = int(o * samp)
 
-        m = (l_audio - samp - 1) / samp
-        n = min(m, 8)
-        x = int(n * samp + s)
-        audio_slice = audio[-x:-s]
+        a = -int(n * samp + s)
+        b = -(2*samp + s)
+
+        audio_slice = audio[a:b]
 
         phi_str = f'{phi:3.2F}'
-        print(f'Locked to f = {f:.3F}Hz with phi = {phi_str:5} | s = {s:4.0F} | m = {m:1.0F}\n\n')
+        print(f'Locked to f = {f:4.1F}Hz with phi = {phi_str:5} | s = {s:4.0F} | m = {m:1.2F} | a = {a:1.0F} | b = {b:1.0F}\n\n')
         # print(pa_idx)
 
         if (len(audio_slice) > 0):
             debug = dsp.interpolate(audio_slice, FFT_LEN_INTERPOLATION)
 
-    input_curve.setData(y=fft, x=freqs)
+    # input_curve.setData(y=fft, x=freqs)
     fft_curve.setData(y=debug)
     # mel_curve.setData(y=mel)
 

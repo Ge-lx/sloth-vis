@@ -167,7 +167,7 @@ class PulseAudioMonitorClient (object):
         ## buffer attributes
         buffer_attr = pa_stream_get_buffer_attr(pa_stream_p).contents
         sample_spec = pa_stream_get_sample_spec(pa_stream_p).contents
-        print_structure(sample_spec)
+        # print_structure(sample_spec)
         timing_info['buffer_attributes'] = as_dict(buffer_attr)
 
         self.cb_handler.add_data('timing_info', timing_info)
