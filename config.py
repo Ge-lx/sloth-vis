@@ -22,7 +22,7 @@ configurations = {
 		# Input and output have to use the same sample-rate and number of channels.
 		# Any unavoidable differences should be dealt with using alsa's pcm_rate.
 		# Hardware sample rate
-		'SAMPLE_RATE': 44100,
+		'SAMPLE_RATE': 48000,
 		# Number of channels
 		'CHANNELS': 2,
 
