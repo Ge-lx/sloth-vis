@@ -110,7 +110,8 @@ def process_source_buffer (l, data, idx):
 
     if (state.visualization_enabled()):
         try:
-            fifo_visualize.put((data, idx), block=True)
+            frame = np.frombuffer(data, dtype=np.dtype('<i2')).copy()
+            fifo_visualize.put((frame, idx), block=True)
         except queue.Full:
             cnt_xruns_visualize += 1
 
@@ -124,14 +125,13 @@ def worker_visualize():
         while not fifo_visualize.full():
             time.sleep(0.001)
 
-        (frame, idx) = fifo_visualize.get()
+        (array_stereo, idx) = fifo_visualize.get()
 
         # Don't process if visualization is disabled
         if (state.visualization_enabled() == False):
             continue
 
         # Audio processing
-        array_stereo = np.frombuffer(frame, dtype=np.dtype('<i2'))
         array_mono = array_stereo[::2]/2 + array_stereo[1::2]/2
 
         res = visualization.process_sample(array_mono, idx, logger['measure'])

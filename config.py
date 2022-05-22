@@ -14,7 +14,7 @@ configurations = {
 		# Whether to display debug information
 		'DEBUG': True,
 		# Target GUI framerate. Will warn when this can't be met.
-		'FPS_GUI': 40,
+		'FPS_GUI': 60,
 
         # PulseAudio Configuration
 		# ----------------------------------------------
@@ -43,7 +43,7 @@ configurations = {
 		# Number of pixels in the LED strip (should match WLED settigs)
         'N_PIXELS': 40,
 		# Target LED framerate. Will warn when this can't be met.
-        'FPS_LED': 40,
+        'FPS_LED': 90,
 
 		# FFT Settings 
 		# ----------------------------------
@@ -55,7 +55,7 @@ configurations = {
 		'FFT_N_BINS': 200,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
-        'FFT_WINDOW_LENGTH': 60
+        'FFT_WINDOW_LENGTH': 80
 	}
 }
 

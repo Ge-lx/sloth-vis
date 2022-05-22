@@ -177,9 +177,15 @@ class PulseAudioMonitorClient (object):
         pa_stream_peek(stream, data, c_ulong(length))
         l = int(length / 2)
         # print(index_incr)
-
         data = cast(data, POINTER(c_ushort * l))
-        self.callback_data(l, data.contents, index_incr + l)
+
+        latency = c_ulong()
+        negative = c_int() 
+        pa_stream_get_latency(stream, byref(latency), byref(negative))
+        lat = (-1 if negative.value else 1) * latency.value
+
+
+        self.callback_data(l, data.contents, index_incr)
         pa_stream_drop(stream)
 
     def on_callback_data_received(self, idf, data):

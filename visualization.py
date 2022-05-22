@@ -6,7 +6,7 @@ import state
 import dsp
 
 # Handler for audio samples. Will be updated in 'on_state_change'
-process_sample = lambda samples, idx, logger: None
+process_sample = lambda samples, latency, logger: None
 
 def on_state_change (config, visualization):
     print('on_state_change')
@@ -29,7 +29,7 @@ def on_state_change (config, visualization):
     # Audio sample rolling window
     y_roll = np.random.rand(config['fft_samples_per_window']) / 1e16
 
-    def update(audio_samples, idx, logger):
+    def update(audio_samples, latency, logger):
         nonlocal y_roll
         logger('idle')
 
@@ -62,7 +62,7 @@ def on_state_change (config, visualization):
 
         logger('vis')
 
-        return (y_data, mel, led_output, fft_abs, fft_angle, logger)
+        return (y_data, mel, led_output, fft_abs, fft_angle, logger, l)
 
     # Update sample handler
     process_sample = update
