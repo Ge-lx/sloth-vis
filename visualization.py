@@ -48,19 +48,21 @@ def on_state_change (config, visualization):
         N = len(y_data)
         # fft_ = 
         # print(f'len(fft_): {len(fft_)}')
-        fft = np.abs(np.fft.rfft(y_data * fft_window)) #np.zeros(N//2)#
-        mel = mel_trafo(fft)
+        fft = np.fft.rfft(y_data * fft_window)
+        fft_abs = np.abs(fft)
+        fft_angle = np.angle(fft)
+        mel = mel_trafo(fft_abs)
         # mel = mel**2
 
         logger('fft')
         
         # Visualize
         # mel = mel_smoothing.update(mel)
-        led_output = visualization(mel, y_data, (fft, fft_x))
+        led_output = visualization(mel, y_data, (fft_abs, fft_x))
 
         logger('vis')
 
-        return (y_data, mel, led_output, fft, idx)
+        return (y_data, mel, led_output, fft_abs, fft_angle, l)
 
     # Update sample handler
     process_sample = update

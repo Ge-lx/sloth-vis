@@ -14,7 +14,7 @@ configurations = {
 		# Whether to display debug information
 		'DEBUG': True,
 		# Target GUI framerate. Will warn when this can't be met.
-		'FPS_GUI': 90,
+		'FPS_GUI': 60,
 
         # PulseAudio Configuration
 		# ----------------------------------------------
@@ -28,7 +28,7 @@ configurations = {
 
 		# PulseAudio input mode. Choose from
 		# ['default_sink', 'default_source', ' sink_by_name', 'source_by_name']
-		'AUDIO_INPUT_MODE': 'default_sink',
+		'AUDIO_INPUT_MODE': 'default_source',
 
 		# Full PulseAudio sink/source name.
 		# Only used for ['sink_by_name', 'source_by_name']
@@ -37,13 +37,13 @@ configurations = {
 		# LED Output
 		# ----------------------------------
 		# IP address(s) of the WLED ESP8266.
-        'UDP_IP': ['192.168.0.53'],#'192.168.8.121'
+        'UDP_IP': ['192.168.0.53', '192.168.0.57'],
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 21324,
 		# Number of pixels in the LED strip (should match WLED settigs)
         'N_PIXELS': 40,
 		# Target LED framerate. Will warn when this can't be met.
-        'FPS_LED': 10,
+        'FPS_LED': 30,
 
 		# FFT Settings 
 		# ----------------------------------
@@ -153,8 +153,8 @@ def visualizations(config):
 		return output * 255
 
 	return {
-		'smooth': visualize_spectrum_smooth,
 		'spectrum': visualize_spectrum,
+		'smooth': visualize_spectrum_smooth,
 		'waveform': visualize_waveform,
 		'spectrum2': visualize_spectrum_2,
 		'folded': folded_fourier
