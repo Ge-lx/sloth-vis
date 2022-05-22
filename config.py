@@ -14,7 +14,7 @@ configurations = {
 		# Whether to display debug information
 		'DEBUG': True,
 		# Target GUI framerate. Will warn when this can't be met.
-		'FPS_GUI': 90,
+		'FPS_GUI': 40,
 
         # PulseAudio Configuration
 		# ----------------------------------------------
@@ -22,7 +22,7 @@ configurations = {
 		# Input and output have to use the same sample-rate and number of channels.
 		# Any unavoidable differences should be dealt with using alsa's pcm_rate.
 		# Hardware sample rate
-		'SAMPLE_RATE': 48000,
+		'SAMPLE_RATE': 44100,
 		# Number of channels
 		'CHANNELS': 2,
 
@@ -37,25 +37,25 @@ configurations = {
 		# LED Output
 		# ----------------------------------
 		# IP address(s) of the WLED ESP8266.
-        'UDP_IP': ['192.168.0.53', '192.168.0.57'],
+        'UDP_IP': [],
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 21324,
 		# Number of pixels in the LED strip (should match WLED settigs)
         'N_PIXELS': 40,
 		# Target LED framerate. Will warn when this can't be met.
-        'FPS_LED': 30,
+        'FPS_LED': 40,
 
 		# FFT Settings 
 		# ----------------------------------
 		# Frequencies below this value will be removed during audio processing
-		'MIN_FREQUENCY': 50,
+		'MIN_FREQUENCY': 40,
 		# Frequencies above this value will be removed during audio processing
         'MAX_FREQUENCY': 18000,
 		# Number of frequency bins to use when transforming audio to frequency domain
-		'FFT_N_BINS': 100,
+		'FFT_N_BINS': 200,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
-        'FFT_WINDOW_LENGTH': 100
+        'FFT_WINDOW_LENGTH': 60
 	}
 }
 

@@ -244,7 +244,7 @@ class PulseAudioMonitorClient (object):
         print(f'Using fragsize of {bytes_per_fragment}')
         
         bufferattr = pa_buffer_attr()
-        bufferattr.maxlength = c_uint32(-1) # c_uint32(bytes_per_frame * self.period_size)
+        bufferattr.maxlength = c_uint32(bytes_per_fragment)
         bufferattr.tlength = c_uint32(-1)
         bufferattr.prebuf = c_uint32(-1)
         bufferattr.minreq = c_uint32(-1)
@@ -277,4 +277,4 @@ def start_backend(config, callback_data, callback_meta):
                                      input_config=input_config,
                                      rate=config["SAMPLE_RATE"],
                                      channels=config["CHANNELS"],
-                                     period_size=config["fft_samples_per_window"])
+                                     period_size=config["fft_samples_per_update"])

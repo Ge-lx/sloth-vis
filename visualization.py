@@ -55,14 +55,14 @@ def on_state_change (config, visualization):
         # mel = mel**2
 
         logger('fft')
-        
+
         # Visualize
         # mel = mel_smoothing.update(mel)
         led_output = visualization(mel, y_data, (fft_abs, fft_x))
 
         logger('vis')
 
-        return (y_data, mel, led_output, fft_abs, fft_angle, l)
+        return (y_data, mel, led_output, fft_abs, fft_angle, logger)
 
     # Update sample handler
     process_sample = update
