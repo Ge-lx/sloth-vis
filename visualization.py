@@ -29,6 +29,19 @@ def on_state_change (config, visualization):
     # Audio sample rolling window
     y_roll = np.random.rand(config['fft_samples_per_window']) / 1e16
 
+    FFT_LEN = config['fft_samples_per_window'] // 2 + 1
+    NUM_SPECIAL_CURVES = 2
+    WAVES_LEN = config['WAVES_LEN']
+    NUM_CURVES = config['NUM_CURVES']
+    l_audio = config['fft_samples_per_window']
+    pa_idx = 0
+
+    len_wave = lambda i: WAVES_LEN - i * 200
+    fft_filter = dsp.ExpFilter(np.tile(1e-1, FFT_LEN), alpha_decay=0.3, alpha_rise=0.3)
+    window_inverse = 1/np.blackman(l_audio)
+    curve_max_filter = [dsp.ExpFilter(1, alpha_decay=0.1, alpha_rise=0.8) for _ in range(NUM_CURVES - NUM_SPECIAL_CURVES)]
+
+
     def update(audio_samples, latency, logger):
         nonlocal y_roll
         logger('idle')
@@ -46,7 +59,6 @@ def on_state_change (config, visualization):
 
         # Fourier transform and mel transformation
         N = len(y_data)
-        # fft_ = 
         # print(f'len(fft_): {len(fft_)}')
         fft = np.fft.rfft(y_data)
         fft_abs = np.abs(fft)
@@ -62,7 +74,71 @@ def on_state_change (config, visualization):
 
         logger('vis')
 
-        return (y_data, mel, led_output, fft, logger, l)
+        # Frequency weighing
+        freqs = np.linspace(0, config['SAMPLE_RATE'] // 2, FFT_LEN)
+        cutoff_freq_upper_hz = config['MAX_FREQUENCY']
+        cutoff_freq_lower_hz = config['MIN_FREQUENCY']
+        freq_to_samples = lambda f: int(config['SAMPLE_RATE'] // f)
+        cutoff_idx_upper = np.argwhere(freqs > cutoff_freq_upper_hz)[0][0]
+        cutoff_idx_lower = np.argwhere(freqs > cutoff_freq_lower_hz)[0][0]
+        freq_weighing = np.concatenate((
+            np.zeros(cutoff_idx_lower),
+            np.linspace(1.5, 3.0, cutoff_idx_upper - cutoff_idx_lower),
+            np.zeros(FFT_LEN - cutoff_idx_upper)))
+
+        wave_offset = lambda i: np.log((3*i)**2 + 1) + 1.5**i + 3*i
+        wave_scale = lambda i: ((i+2)**2) / (i+1) * 1.2
+        y = 5
+        cutoff = [1, 30, 300]
+        num_clip = [0, 10, 60]
+        clip_sides = [num_clip[i] * freq_to_samples(freqs[cutoff[i]]) for i in range(len(cutoff))]
+        scale = [1.5, 2, 3]
+        NUM_ABOVE = 1
+        NUM_BELOW = 1
+
+        data_waves = [tuple()] * NUM_CURVES
+        for i in range(NUM_CURVES - NUM_ABOVE - NUM_BELOW):
+            y_data_wave = np.full((len_wave(i+NUM_BELOW)), wave_offset(i+NUM_BELOW))
+
+            fft = fft_abs.copy()
+            fft[0] /= scale[i]
+            if (i > 0):
+                a = cutoff[i]-1
+                fft[1:cutoff[i]] = 0
+            irfft = np.fft.irfft(fft)
+            irfft = (irfft)[y:l_audio-y].clip(-1, 1) * scale[i] - 0.1
+            l_irfft = len(irfft)
+            n_clip = clip_sides[i]
+
+            irfft = irfft[n_clip:l_irfft-n_clip]
+            l_irfft -= 2 * n_clip
+            audio_copy = np.zeros(l_irfft)
+            audio_copy[:l_irfft // 2] = irfft[:l_irfft//2][::-1]
+            audio_copy[l_irfft // 2:] = irfft[l_irfft//2:][::-1]
+
+            y_data_wave = dsp.interpolate(audio_copy, len_wave(i+NUM_BELOW))
+            y_data_wave_max = curve_max_filter[i].update(y_data_wave.max())
+            y_data_wave /= max(0.02, min(3, y_data_wave_max + 0.5))
+            y_data_wave = y_data_wave * wave_scale(i+NUM_BELOW) + wave_offset(i+NUM_BELOW)
+
+            x_data_wave = np.arange((i + NUM_BELOW) * 100, WAVES_LEN - (i + NUM_BELOW) * 100)
+            data_waves[i+NUM_BELOW] = (x_data_wave, y_data_wave)
+
+        NM1 = NUM_CURVES - 1
+        y_mel = dsp.interpolate(mel, WAVES_LEN - NM1 * 200) * 5 + wave_offset(NM1) - 3
+        x_mel = np.arange(NM1 * 100, WAVES_LEN - NM1 * 100)
+        data_waves[NM1] = (x_mel, y_mel)
+
+        NM2 = 0
+        y_audio = dsp.interpolate(y_data, WAVES_LEN - NM2 * 200) * 2 + wave_offset(NM2) + 0.8
+        x_audio = np.arange(NM2 * 100, WAVES_LEN - NM2 * 100)
+        data_waves[NM2] = (x_audio, y_audio)
+
+        logger('waves')
+
+        # print(data_waves)
+
+        return (data_waves, logger, led_output)
 
     # Update sample handler
     process_sample = update

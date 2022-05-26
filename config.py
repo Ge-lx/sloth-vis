@@ -55,7 +55,11 @@ configurations = {
 		'FFT_N_BINS': 200,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
-        'FFT_WINDOW_LENGTH': 40
+        'FFT_WINDOW_LENGTH': 40,
+
+        'WAVES_LEN': 1800,
+        'NUM_CURVES': 5
+
 	}
 }
 
