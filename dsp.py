@@ -55,12 +55,38 @@ def compute_melmat(num_mel_bands=12, freq_min=64, freq_max=8000, num_fft_bands=5
     mean = lambda x: x.sum() if len(x) > 0 else 0
     ind_compat = lambda f_lim: [i for i, f in enumerate(freqs) if f < f_lim and f > freq_min]
     ind_low_lim = max([i for i, f in enumerate(freqs) if f <= freq_min])
-    indices = [max(ind_compat(f)) for f in upper_edges_hz]
+
+    indices = [ind_compat(f) for f in upper_edges_hz]
+    for i in range(len(indices)):
+        comp = indices[i]
+        if len(comp) == 0:
+            if i == 0:
+                indices[i] = ind_low_lim
+            else:
+                indices[i] = indices[i-1]
+        else :
+            indices[i] = max(comp)
+
+    print(indices)
     freq_weight = lambda i: 1#(0.2 + (i+1)*4/num_mel_bands)
 
     def transform (fft_spectrum):
         bin_slice = lambda i: fft_spectrum[(indices[i-1] if i > 0 else ind_low_lim):indices[i]]
-        bin_means = [mean(bin_slice(i)) * freq_weight(i) for i in range(num_mel_bands)]
+
+        i = 0
+        copy = 0
+        bin_means = np.zeros(num_mel_bands)
+        while i < num_mel_bands:
+            if indices[i] == (indices[i-1] if i > 0 else ind_low_lim):
+                copy += 1
+            elif copy:
+                bin_means[i-copy:i+1] = mean(bin_slice(i)) * freq_weight(i) / copy
+                copy = 0
+            else:
+                bin_means[i] = mean(bin_slice(i)) * freq_weight(i)
+            i += 1
+
+        [mean(bin_slice(i)) * freq_weight(i) for i in range(num_mel_bands)]
         return np.array(bin_means) / (num_fft_bands / 5)
 
     return transform, (center_frequencies_hz, freqs)

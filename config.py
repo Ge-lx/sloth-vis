@@ -48,14 +48,14 @@ configurations = {
 		# FFT Settings 
 		# ----------------------------------
 		# Frequencies below this value will be removed during audio processing
-		'MIN_FREQUENCY': 40,
+		'MIN_FREQUENCY': 45,
 		# Frequencies above this value will be removed during audio processing
-        'MAX_FREQUENCY': 18000,
+        'MAX_FREQUENCY': 15000,
 		# Number of frequency bins to use when transforming audio to frequency domain
 		'FFT_N_BINS': 200,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
-        'FFT_WINDOW_LENGTH': 80
+        'FFT_WINDOW_LENGTH': 40
 	}
 }
 
@@ -153,9 +153,9 @@ def visualizations(config):
 		return output * 255
 
 	return {
+		'waveform': visualize_waveform,
 		'spectrum': visualize_spectrum,
 		'smooth': visualize_spectrum_smooth,
-		'waveform': visualize_waveform,
 		'spectrum2': visualize_spectrum_2,
 		'folded': folded_fourier
 	}

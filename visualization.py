@@ -12,7 +12,7 @@ def on_state_change (config, visualization):
     print('on_state_change')
     global process_sample
     # FFT window shape
-    fft_window = np.hanning(config['fft_samples_per_window'])
+    fft_window = np.blackman(config['fft_samples_per_window'])
 
     # FFT binning (mel-bank-transformation)
     mel_trafo, (mel_x, fft_x) = dsp.compute_melmat(
@@ -34,7 +34,7 @@ def on_state_change (config, visualization):
         logger('idle')
 
         # Normalize samples between 0 and 1
-        y_update = audio_samples / 2.0**15 + 0.5
+        y_update = audio_samples / 2.0**15
         # Construct a rolling window of audio samples
         l = len(y_update)
         # print((l, len(y_roll)))
@@ -48,7 +48,7 @@ def on_state_change (config, visualization):
         N = len(y_data)
         # fft_ = 
         # print(f'len(fft_): {len(fft_)}')
-        fft = np.fft.rfft(y_data * fft_window)
+        fft = np.fft.rfft(y_data)
         fft_abs = np.abs(fft)
         fft_angle = np.angle(fft)
         mel = mel_trafo(fft_abs)
@@ -62,7 +62,7 @@ def on_state_change (config, visualization):
 
         logger('vis')
 
-        return (y_data, mel, led_output, fft_abs, fft_angle, logger, l)
+        return (y_data, mel, led_output, fft, logger, l)
 
     # Update sample handler
     process_sample = update
