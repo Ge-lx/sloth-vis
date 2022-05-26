@@ -33,7 +33,7 @@ def init(cfg, tick_callback):
 
     # FFT Plot
     plot_wave = layout.addPlot(title='Sloth 2', colspan=3)
-    plot_wave.setRange(yRange=[1, 23], xRange=[0, WAVES_LEN])
+    plot_wave.setRange(yRange=[-2, 26], xRange=[0, WAVES_LEN])
     plot_wave.disableAutoRange(axis=pg.ViewBox.YAxis)
     plot_wave.disableAutoRange(axis=pg.ViewBox.XAxis)
     # plot_wave.setDownsampling(ds=True, auto=True, mode='subsample')
@@ -66,8 +66,15 @@ def update(output):
 
     data_waves, logger, _ = output
 
+    WAVES_LEN = config['WAVES_LEN']
+    NUM_CURVES = config['NUM_CURVES']
+    NUM_ABOVE = 1
+    NUM_BELOW = 1
+    wave_offset = lambda i: np.log((3*i)**2 + 1) + 1.5**i + 4*i
+    wave_scale = lambda i: ((i+2)**2) / (i+1) * 1.2
     with data_lock:
         for i, (x_data_wave, y_data_wave) in enumerate(data_waves):
+            y_data_wave = y_data_wave * wave_scale(i) + wave_offset(i)
             fft_curves[i].setData(y=y_data_wave, x=x_data_wave)
 
-    logger('GUI_DATA')
+    logger('gui')

@@ -67,7 +67,6 @@ def compute_melmat(num_mel_bands=12, freq_min=64, freq_max=8000, num_fft_bands=5
         else :
             indices[i] = max(comp)
 
-    print(indices)
     freq_weight = lambda i: 1#(0.2 + (i+1)*4/num_mel_bands)
 
     def transform (fft_spectrum):

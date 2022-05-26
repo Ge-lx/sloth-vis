@@ -86,8 +86,6 @@ def on_state_change (config, visualization):
             np.linspace(1.5, 3.0, cutoff_idx_upper - cutoff_idx_lower),
             np.zeros(FFT_LEN - cutoff_idx_upper)))
 
-        wave_offset = lambda i: np.log((3*i)**2 + 1) + 1.5**i + 3*i
-        wave_scale = lambda i: ((i+2)**2) / (i+1) * 1.2
         y = 5
         cutoff = [1, 30, 300]
         num_clip = [0, 10, 60]
@@ -98,7 +96,6 @@ def on_state_change (config, visualization):
 
         data_waves = [tuple()] * NUM_CURVES
         for i in range(NUM_CURVES - NUM_ABOVE - NUM_BELOW):
-            y_data_wave = np.full((len_wave(i+NUM_BELOW)), wave_offset(i+NUM_BELOW))
 
             fft = fft_abs.copy()
             fft[0] /= scale[i]
@@ -119,24 +116,22 @@ def on_state_change (config, visualization):
             y_data_wave = dsp.interpolate(audio_copy, len_wave(i+NUM_BELOW))
             y_data_wave_max = curve_max_filter[i].update(y_data_wave.max())
             y_data_wave /= max(0.02, min(3, y_data_wave_max + 0.5))
-            y_data_wave = y_data_wave * wave_scale(i+NUM_BELOW) + wave_offset(i+NUM_BELOW)
+            y_data_wave = y_data_wave
 
             x_data_wave = np.arange((i + NUM_BELOW) * 100, WAVES_LEN - (i + NUM_BELOW) * 100)
             data_waves[i+NUM_BELOW] = (x_data_wave, y_data_wave)
 
         NM1 = NUM_CURVES - 1
-        y_mel = dsp.interpolate(mel, WAVES_LEN - NM1 * 200) * 5 + wave_offset(NM1) - 3
+        y_mel = dsp.interpolate(mel, WAVES_LEN - NM1 * 200) - 0.5
         x_mel = np.arange(NM1 * 100, WAVES_LEN - NM1 * 100)
         data_waves[NM1] = (x_mel, y_mel)
 
         NM2 = 0
-        y_audio = dsp.interpolate(y_data, WAVES_LEN - NM2 * 200) * 2 + wave_offset(NM2) + 0.8
+        y_audio = dsp.interpolate(y_data, WAVES_LEN - NM2 * 200)
         x_audio = np.arange(NM2 * 100, WAVES_LEN - NM2 * 100)
         data_waves[NM2] = (x_audio, y_audio)
 
         logger('waves')
-
-        # print(data_waves)
 
         return (data_waves, logger, led_output)
 

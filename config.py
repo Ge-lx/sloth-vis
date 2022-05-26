@@ -37,11 +37,11 @@ configurations = {
 		# LED Output
 		# ----------------------------------
 		# IP address(s) of the WLED ESP8266.
-        'UDP_IP': [],
+        'UDP_IP': ['192.168.178.44'],
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 21324,
 		# Number of pixels in the LED strip (should match WLED settigs)
-        'N_PIXELS': 40,
+        'N_PIXELS': 180,
 		# Target LED framerate. Will warn when this can't be met.
         'FPS_LED': 90,
 
@@ -157,9 +157,9 @@ def visualizations(config):
 		return output * 255
 
 	return {
+		'smooth': visualize_spectrum_smooth,
 		'waveform': visualize_waveform,
 		'spectrum': visualize_spectrum,
-		'smooth': visualize_spectrum_smooth,
 		'spectrum2': visualize_spectrum_2,
 		'folded': folded_fourier
 	}

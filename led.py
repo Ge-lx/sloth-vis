@@ -2,6 +2,7 @@ from __future__ import print_function
 from __future__ import division
 import socket
 import numpy as np
+import dsp
 from state import default_config as config
 
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -24,6 +25,22 @@ def send_pixels(pixels):
         udp_socket.sendto(data_to_send, (ip, config['UDP_PORT']));
 
 def update(output):
-    pixels = output[2].astype(int)
+    data_waves, logger, visu = output
+
+    data = dsp.interpolate(data_waves[1][1], config['N_PIXELS'])
+    data = ((data + 0.3)**2 * 255).astype(int)
+
+    data1 = dsp.interpolate(data_waves[2][1], config['N_PIXELS'])
+    data1 = ((data1 + 0.3)**2 * 255).astype(int)
+
+    data2 = dsp.interpolate(data_waves[3][1], config['N_PIXELS'])
+    data2 = ((data2 + 0.2)**2 * 10 * 255).astype(int)
+    # print(np.max(data))
+    # pix_red = data
+    # pix_green = (dsp.interpolate(data_waves[3][1], config['N_PIXELS']) * 255).astype(int)
+    # pixels = [pix_red, pix_green, np.zeros(config['N_PIXELS'])]
+    pixels = [(data + data1//2), data1 // 2, data2]
+
+    # pixels = output[2].astype(int)
     return send_pixels(pixels)
-    
+
