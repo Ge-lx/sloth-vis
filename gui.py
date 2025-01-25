@@ -19,11 +19,12 @@ def init(cfg, tick_callback):
     WAVES_LEN = config['WAVES_LEN']
     NUM_CURVES = config['NUM_CURVES']
 
+    from PyQt5 import QtWidgets
     import pyqtgraph as pg
-    from pyqtgraph.Qt import QtGui, QtCore
 
     # Create GUI window
-    app = QtGui.QApplication([])
+    # app = QtGui.QGuiApplication([])
+    app = QtWidgets.QApplication([])
     view = pg.GraphicsView()
     layout = pg.GraphicsLayout(border=(100,100,100))
     view.setCentralItem(layout)

@@ -87,8 +87,8 @@ def on_state_change (config, visualization):
             np.zeros(FFT_LEN - cutoff_idx_upper)))
 
         y = 5
-        cutoff = [1, 30, 300]
-        num_clip = [0, 10, 60]
+        cutoff = [1, 14, 400]
+        num_clip = [0, 3, 60]
         clip_sides = [num_clip[i] * freq_to_samples(freqs[cutoff[i]]) for i in range(len(cutoff))]
         scale = [1.5, 2, 3]
         NUM_ABOVE = 1
@@ -98,7 +98,7 @@ def on_state_change (config, visualization):
         for i in range(NUM_CURVES - NUM_ABOVE - NUM_BELOW):
 
             fft = fft_abs.copy()
-            fft[0] /= scale[i]
+            fft[0] *= 0 if i < 1 else 0
             if (i > 0):
                 a = cutoff[i]-1
                 fft[1:cutoff[i]] = 0

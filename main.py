@@ -6,7 +6,7 @@ import audio_backend.backend_pulseaudio as pulseaudio
 import numpy as np
 
 from utils import setInterval, runAsync, setTimeout
-# from web import app
+from web import app
 import control_socket
 import state
 import visualization
@@ -205,7 +205,7 @@ if __name__ == '__main__':
 
     # Start pulseaudio backend
     pulseaudio.start_backend(config, process_source_buffer, timing_update_handler)
-    
+
     # Start visualization worker
     runAsync(worker_visualize)
 
@@ -231,8 +231,9 @@ if __name__ == '__main__':
     setTimeout(lambda: state.enable_visualization(), 1)
 
     if config["USE_GUI"]:
+        runAsync(control_socket.start_control_socket)
         gui.init(cfg=config, tick_callback=print_debug if config["DEBUG"] else lambda: None)
     else:
         setInterval(print_debug, 1)
         control_socket.start_control_socket()
-        # app.run(host='0.0.0.0')
+        app.run(host='0.0.0.0')

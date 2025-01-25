@@ -37,22 +37,22 @@ configurations = {
 		# LED Output
 		# ----------------------------------
 		# IP address(s) of the WLED ESP8266.
-        'UDP_IP': ['192.168.178.44'],
+        'UDP_IP': ['192.168.68.250'],
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 21324,
 		# Number of pixels in the LED strip (should match WLED settigs)
-        'N_PIXELS': 180,
+        'N_PIXELS': 23,
 		# Target LED framerate. Will warn when this can't be met.
-        'FPS_LED': 90,
+        'FPS_LED': 60,
 
 		# FFT Settings 
 		# ----------------------------------
 		# Frequencies below this value will be removed during audio processing
-		'MIN_FREQUENCY': 45,
+		'MIN_FREQUENCY': 20,
 		# Frequencies above this value will be removed during audio processing
         'MAX_FREQUENCY': 15000,
 		# Number of frequency bins to use when transforming audio to frequency domain
-		'FFT_N_BINS': 200,
+		'FFT_N_BINS': 300,
 		#Length (ms) of the rolling audio window to be used. Will be adjusted to
 		# improve fft performance.
         'FFT_WINDOW_LENGTH': 40,
@@ -113,14 +113,14 @@ def visualizations(config):
 		def color_from_value (x):
 			return hsv2rgb(x, 1, x)
 
-			colors = np.array([color_from_value(h) for h in log_part]).transpose()
-			pixels = np.array([
-				colors[0],
-				colors[1],
-				colors[2],
-				np.clip(0.3 * interpolated, 0, 1),
-			])
-			return pixels * 255;
+		colors = np.array([color_from_value(h) for h in log_part]).transpose()
+		pixels = np.array([
+			colors[0],
+			colors[1],
+			colors[2],
+			np.clip(0.3 * interpolated, 0, 1),
+		])
+		return pixels * 255;
 
 	indices = None
 	fft_smoothing = dsp.ExpFilter(np.tile(1e-1, int(config['fft_samples_per_window'] / 2)), alpha_decay=0.1, alpha_rise=0.7)
