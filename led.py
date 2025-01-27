@@ -22,25 +22,40 @@ def send_pixels(pixels):
     for ip in udp_ips:
         udp_socket.sendto(data_to_send, (ip, config['UDP_PORT']));
 
+def send_pixels_new (pix_data):
+
+    num_led_datas = len(pix_data)
+    if num_led_datas != len(config['UDP_IP']):
+        print('Number of led_datas does not match length of IPs')
+        return
+
+    for i, ip in enumerate(config['UDP_IP']):
+        data_to_send = bytes([2, WLED_TIMEOUT_S]) + bytes(pix_data[i].flatten())
+        udp_socket.sendto(data_to_send, (ip, config['UDP_PORT']))
+
 def update(output):
     data_waves, logger, visu = output
-    # print(visu.shape)
 
-    data = dsp.interpolate(data_waves[1][1], config['N_PIXELS'])
-    data = ((data + 0.2)**2 * 255).astype(int)
+    if (True):
+        return send_pixels_new(visu)
 
-    data1 = dsp.interpolate(data_waves[2][1], config['N_PIXELS'])
-    data1 = ((data1 + 0.3)**2 * 255).astype(int)
+    # data = dsp.interpolate(data_waves[1][1], config['N_PIXELS'])
+    # data = ((data + 0.2)**2 * 255).astype(int)
 
-    data2 = dsp.interpolate(data_waves[3][1], config['N_PIXELS'])
-    data2 = ((data2 + 0.25)**2 * 10 * 255).astype(int)
+    # data1 = dsp.interpolate(data_waves[2][1], config['N_PIXELS'])
+    # data1 = ((data1 + 0.3)**2 * 255).astype(int)
+
+    # data2 = dsp.interpolate(data_waves[3][1], config['N_PIXELS'])
+    # data2 = ((data2 + 0.25)**2 * 10 * 255).astype(int)
+
     # print(np.max(data))
     # pix_red = data
     # pix_green = (dsp.interpolate(data_waves[3][1], config['N_PIXELS']) * 255).astype(int)
     # pixels = [pix_red, pix_green, np.zeros(config['N_PIXELS'])]
-    pixels = [(data), np.zeros(config['N_PIXELS']), data2]
+    
+    # pixels = [(data), np.zeros(config['N_PIXELS']), data2]
 
     # pixels = output[2].astype(int)
-    return send_pixels(visu)
+    # return send_pixels(visu)
     return send_pixels(visu)
 

@@ -10,7 +10,7 @@ configurations = {
 		# GUI Configuration
 		# ----------------------------------
 		# Whether or not to display a PyQtGraph GUI plot of visualization
-		'USE_GUI': True,
+		'USE_GUI': False,
 		# Whether to display debug information
 		'DEBUG': True,
 		# Target GUI framerate. Will warn when this can't be met.
@@ -28,7 +28,7 @@ configurations = {
 
 		# PulseAudio input mode. Choose from
 		# ['default_sink', 'default_source', ' sink_by_name', 'source_by_name']
-		'AUDIO_INPUT_MODE': 'default_sink',
+		'AUDIO_INPUT_MODE': 'default_source',
 
 		# Full PulseAudio sink/source name.
 		# Only used for ['sink_by_name', 'source_by_name']
@@ -37,11 +37,11 @@ configurations = {
 		# LED Output
 		# ----------------------------------
 		# IP address(s) of the WLED ESP8266.
-        'UDP_IP': ['192.168.68.250'],
+        'UDP_IP': ['192.168.0.147', '192.168.0.108'],
 		# Port number used for socket communication between Python and ESP8266
 		'UDP_PORT': 21324,
 		# Number of pixels in the LED strip (should match WLED settigs)
-        'N_PIXELS': 23,
+        'N_PIXELS': [23, 39],
 		# Target LED framerate. Will warn when this can't be met.
         'FPS_LED': 60,
 
@@ -156,7 +156,102 @@ def visualizations(config):
 
 		return output * 255
 
+
+	blue_ish = np.array([0, 40, 255])
+	purple_ish = np.array([120, 0, 230])
+	orange_ish = np.array([255, 60, 40])
+	white = np.array([255, 255, 255])
+	black = np.array([0, 0, 0])
+	state_adv_multi_strip = {
+		'in_beat': False,
+		'colors': [blue_ish, purple_ish, orange_ish],
+		'color_idx_a': 0,
+		'color_idx_b': 1,
+		'hi_freq_region': [8e3, 12e3],
+		'lo_freq_region': [0, 100],
+		'color_brightness': dsp.ExpFilter(0, alpha_decay=0.1, alpha_rise=0.5),
+		'lo_energy_mean': dsp.ExpFilter(0, alpha_decay=0.01, alpha_rise=0.01),
+		'hi_energy_mean': dsp.ExpFilter(0, alpha_decay=0.001, alpha_rise=0.001),
+		'segments': [5, 9], # 3 on small strip, 5 on large strip
+		'mapping': {
+			'lo': ([],[]),#([1], [2]),
+			'hi': ([2], [1, 7]),
+			'color_a': ([], [0, 2, 3, 4, 5, 6, 8]),
+			'color_b': ([0, 1, 3, 4], [])
+		}
+	}
+
+	def advanced_multi_strip (spectrum, waveform, fft_data):
+		fft_vals, fft_freqs = fft_data
+		lo_freq_reg = state_adv_multi_strip['lo_freq_region']
+		hi_freq_reg = state_adv_multi_strip['hi_freq_region']
+		colors = state_adv_multi_strip['colors']
+
+		bins_lo = fft_vals[np.where(np.all([fft_freqs < lo_freq_reg[1], fft_freqs > lo_freq_reg[0]], axis=0))]
+		bins_hi = fft_vals[np.where(np.all([fft_freqs < hi_freq_reg[1], fft_freqs > hi_freq_reg[0]], axis=0))]
+
+		lo_mean = np.mean(bins_lo)
+		hi_mean = np.mean(bins_hi)
+
+		lo_filt = max(4, state_adv_multi_strip['lo_energy_mean'].update(lo_mean))
+		hi_filt = max(4, state_adv_multi_strip['hi_energy_mean'].update(hi_mean))
+
+		hi_bright = min(1, hi_mean / hi_filt) * 0.8
+		in_beat = lo_mean >= lo_filt * 1.5
+
+		new_beat = not state_adv_multi_strip['in_beat'] and in_beat
+		if (not in_beat and state_adv_multi_strip['in_beat']):
+			state_adv_multi_strip['in_beat'] = False
+		if (new_beat):
+			state_adv_multi_strip['in_beat'] = True
+			state_adv_multi_strip['color_idx_a'] = state_adv_multi_strip['color_idx_b']
+			state_adv_multi_strip['color_idx_b'] = (state_adv_multi_strip['color_idx_b'] + 1) % len(colors)
+
+		color_a = colors[state_adv_multi_strip['color_idx_a']]
+		color_b = colors[state_adv_multi_strip['color_idx_b']]
+		color_brightness = state_adv_multi_strip['color_brightness'].update(0.6 if in_beat else 0.4)
+
+		num_strips = len(state_adv_multi_strip['segments'])
+		data_leds = []
+		for i in range(num_strips):
+			data_led = np.zeros((config['N_PIXELS'][i], 3), np.uint8)
+			idx_range = np.arange(len(data_led))
+			num_segs = state_adv_multi_strip['segments'][i]
+			seg_length = len(data_led) / num_segs
+
+			segment_idcs = [np.where(np.all([idx_range >= (i * seg_length), idx_range < ((i+1) * seg_length)], axis=0))[0] for i in range(num_segs)]
+
+			lo_segs = state_adv_multi_strip['mapping']['lo'][i]
+			hi_segs = state_adv_multi_strip['mapping']['hi'][i]
+			color_a_segs = state_adv_multi_strip['mapping']['color_a'][i]
+			color_b_segs = state_adv_multi_strip['mapping']['color_b'][i]
+
+			for s in lo_segs:
+				led_idcs = segment_idcs[s]
+				val = white if in_beat else black
+				data_led[led_idcs] = np.full((len(led_idcs), 3), val)
+
+			for s in hi_segs:
+				led_idcs = segment_idcs[s]
+				val =  white * hi_bright
+				data_led[led_idcs] = np.full((len(led_idcs), 3), val)
+
+			for s in color_a_segs:
+				led_idcs = segment_idcs[s]
+				val =  color_a * color_brightness
+				data_led[led_idcs] = np.full((len(led_idcs), 3), val)
+
+			for s in color_b_segs:
+				led_idcs = segment_idcs[s]
+				val =  color_b * color_brightness
+				data_led[led_idcs] = np.full((len(led_idcs), 3), val)
+
+			data_leds.append(data_led)
+
+		return data_leds
+
 	return {
+		'new': advanced_multi_strip,
 		'smooth': visualize_spectrum_smooth,
 		'waveform': visualize_waveform,
 		'spectrum': visualize_spectrum,
